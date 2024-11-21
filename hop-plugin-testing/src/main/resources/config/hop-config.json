@@ -1,0 +1,61 @@
+{
+  "LocaleDefault": "en_US",
+  "guiProperties": {
+    "FontFixedSize": "13",
+    "MaxUndo": "100",
+    "DarkMode": "N",
+    "FontNoteSize": "13",
+    "ShowCanvasGrid": "N",
+    "MiddlePct": "35",
+    "HideViewport": "N",
+    "FontFixedStyle": "0",
+    "FontNoteName": ".AppleSystemUIFont",
+    "ContextDialogFixedWidth": "Y",
+    "FontFixedName": "Monaco",
+    "HideMenuBar": "N",
+    "FontGraphStyle": "0",
+    "FontDefaultSize": "13",
+    "FontGraphSize": "13",
+    "IconSize": "32",
+    "GlobalZoomFactor": "1.0",
+    "FontNoteStyle": "0",
+    "FontGraphName": ".AppleSystemUIFont",
+    "ShowTableViewToolbar": "Y",
+    "FontDefaultName": ".AppleSystemUIFont",
+    "FontDefaultStyle": "0",
+    "CanvasGridSize": "16",
+    "ContextDialogShowCategories": "Y",
+    "WorkflowDialogStyle": "RESIZE,MAX,MIN",
+    "LineWidth": "1"
+  },
+  "projectsConfig": {
+    "enabled": true,
+    "projectMandatory": true,
+    "environmentMandatory": false,
+    "environmentsForActiveProject": false,
+    "defaultProject": "default",
+    "defaultEnvironment": "test",
+    "standardParentProject": "default",
+    "standardProjectsFolder": "target/test-classes",
+    "defaultProjectConfigFile": "project-config.json",
+    "projectConfigurations": [
+      {
+        "projectName": "default",
+        "projectHome": "config/projects/default"
+      },
+      {
+        "projectName": "test",
+        "projectHome": "config/projects/test"
+      },
+      {
+        "projectName": "samples",
+        "projectHome": "config/projects/samples"
+      }
+    ]
+  },
+  "explorer-perspective": {
+    "lazyLoadingDepth": "0",
+    "fileLoadingMaxSize": "10"
+  },
+  "doNotShowWelcomeDialog": true
+}
