@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.apache.hop</groupId>
+        <artifactId>hop-tools</artifactId>
+        <version>2.12.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>hop-ui-helper</artifactId>
+    <name>HOP : Ui Helper</name>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.hop</groupId>
+                <artifactId>hop-bom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.jface</artifactId>
+            <version>3.32.0</version>
+            <classifier>sources</classifier>
+            <optional>true</optional>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-jface-sources</id>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/main/generated-sources</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/main/generated-sources</outputDirectory>
+                            <includeArtifactIds>org.eclipse.jface</includeArtifactIds>
+                            <includeClassifiers>sources</includeClassifiers>
+                            <includes>org/eclipse/jface/widgets/*</includes>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                            <overWriteReleases>true</overWriteReleases>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>clean-generated-sources</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <delete dir="src/main/generated-sources/org/apache/hop/ui/widgets" includes="*.java"/>
+                                <delete file="src/main/generated-sources/org/apache/hop/ui/Assert.java"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>gen-sources-and-fix-xwt</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <echo level="info">Copy some java files from jface source jar</echo>
+                                <replace dir="src/main/generated-sources/org/eclipse/jface/widgets" token="org.eclipse.jface" value="org.apache.hop.ui"/>
+                                <move todir="src/main/generated-sources/org/apache/hop/ui/widgets">
+                                    <fileset dir="src/main/generated-sources/org/eclipse/jface/widgets" excludes="WidgetFactory.java" includes="*.java"/>
+                                </move>
+                                <delete dir="src/main/generated-sources/org/eclipse"/>
+
+                                <echo level="info">Fix a compilable of some listeners for swt and rwt</echo>
+                                <replaceregexp byline="true" match="(.*)(?:Selection|Shell|Tree)Listener([#\.]\w+)Adapter(.*)" replace="\1Adapter\2\3">
+                                    <fileset dir="src/main/generated-sources/org/apache/hop/ui/widgets" includes="*Factory.java"/>
+                                </replaceregexp>
+                                <echo level="info">Append a custom method to all factory classes</echo>
+                                <replaceregexp match="(\s+)public static (\w+)(Factory) new\2\(" replace="\1private \2\3(\2 control) { super(\2\3.class, parent -&gt; control); }\1public static \2\3 of(\2 control) { return new \2\3(control); }\1\0">
+                                    <fileset dir="src/main/generated-sources/org/apache/hop/ui/widgets" includes="*Factory.java"/>
+                                </replaceregexp>
+                                <replaceregexp match="(\s*)public final W create\(" replace="\1public final W apply() { W widget = widgetCreator.create(null); applyProperties(widget); return widget;} \1\0">
+                                    <fileset dir="src/main/generated-sources/org/apache/hop/ui/widgets" includes="AbstractWidgetFactory.java"/>
+                                </replaceregexp>
+                                <replaceregexp byline="true" match="^(\s+)private (WidgetSupplier)" replace="\1protected \2">
+                                    <fileset dir="src/main/generated-sources/org/apache/hop/ui/widgets" includes="AbstractWidgetFactory.java"/>
+                                </replaceregexp>
+                                <replaceregexp byline="true" match="^(\s+)(properties)(.forEach.*;$)" replace="\1try { \2\3 } finally { \2.clear(); }">
+                                    <fileset dir="src/main/generated-sources/org/apache/hop/ui/widgets" includes="AbstractWidgetFactory.java"/>
+                                </replaceregexp>
+                                <replaceregexp byline="true" file="src/main/generated-sources/org/apache/hop/ui/widgets/CompositeFactory.java" match="^public final class" replace="public class"/>
+                                <replaceregexp byline="true" file="src/main/generated-sources/org/apache/hop/ui/widgets/CompositeFactory.java" match="^(\s+)private " replace="\1protected "/>
+                                <echo level="info">Fix api compilable of browser between swt and rwt</echo>
+                                <replace file="src/main/generated-sources/org/apache/hop/ui/widgets/BrowserFactory.java">
+                                    <replacefilter>
+                                        <replacetoken>html, trusted</replacetoken>
+                                        <replacevalue>html</replacevalue>
+                                    </replacefilter>
+                                    <replacefilter>
+                                        <replacetoken>url, postData, headers</replacetoken>
+                                        <replacevalue>url</replacevalue>
+                                    </replacefilter>
+                                    <replacefilter>
+                                        <replacetoken>g.setJavascriptEnabled(false)</replacetoken>
+                                        <replacevalue>{}</replacevalue>
+                                    </replacefilter>
+                                </replace>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>it</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.hop</groupId>
+                    <artifactId>hop-core</artifactId>
+                    <optional>true</optional>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>*</groupId>
+                            <artifactId>*</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.hop</groupId>
+                    <artifactId>hop-engine</artifactId>
+                    <optional>true</optional>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>*</groupId>
+                            <artifactId>*</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.hop</groupId>
+                    <artifactId>hop-ui</artifactId>
+                    <optional>true</optional>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>add-hop-ext</id>
+                                <goals>
+                                    <goal>add-source</goal>
+                                </goals>
+                                <configuration>
+                                    <sources>
+                                        <source>src/main/hop-ext-sources</source>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

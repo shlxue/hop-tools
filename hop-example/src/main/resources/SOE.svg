@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"  standalone="yes"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42 42">
+  <g>
+    <path d="M23 11v-3h9v3h-9" fill="#EFF9FE" stroke="#3D6480" stroke-width=".9"/>
+    <path d="M23 11v6h9v-6" fill="#FFECCE" stroke="#3D6480" stroke-width=".9"/>
+    <line x1="23" x2="32" y1="14" y2="14" stroke="#3D6480"  stroke-width=".4"/>
+
+  <rect x="7" y="9" width="12" height="25" style="stroke:#3D6480;stroke-width:1;fill-opacity:1;stroke-opacity:1" fill="#EFF9FE"/>
+  <path d="M11 12.8h6zm0 3h6zm0 3h6zm0 3h6zm0 3h6z" fill="none" stroke="#3D6480" stroke-width=".5"/>
+  <path d="M8.8 12.5l.5 .5l1 -1m-1.5 3.5l.5 .5l1 -1m-1.5 3.5l.5 .5l1 -1m-1.5 6.5l.5 .5l1 -1" fill="none" stroke="GREEN" stroke-width=".2"/>
+  <path d="M9 21.2l1 1l-.5 -.5l-.5 .5l1 -1" fill="none" stroke="RED" stroke-width=".2"/>
+  <line x1="9.5" x2="9.5" y1="26" y2="32" stroke="#3D6480" stroke-dasharray=".8" stroke-width=".5"/>
+  <text x="11" y="30" font-size=".2em" fill="darkmagenta">CDC</text>
+
+  <text x="21" y="35" font-size=".8em" fill="darkorange">Key</text>
+
+  <path fill="#0CB20F" d="M35,11l-1.344,1.344l0.451,0.451c1.348,1.348,1.348,3.539,0,4.887l-3.205,3.205v-2.763h-1.9v6.007
+		h6.008v-1.9h-2.764l3.205-3.205c2.088-2.088,2.088-5.486,0-7.574z"/>
+  </g>
+</svg>

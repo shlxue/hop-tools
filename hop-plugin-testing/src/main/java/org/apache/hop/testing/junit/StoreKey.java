@@ -1,0 +1,15 @@
+package org.apache.hop.testing.junit;
+
+public enum StoreKey {
+  HOP_JUNIT,
+  HOP_JUNIT_SPEC,
+  HOP_JUNIT_PLUGINS,
+  HOP_JUNIT_PLUGIN_METAS,
+  HOP_GUI_HEADLESS,
+  HOP_SWT_CONTEXT,
+  HOP_SWT_SHELL,
+  HOP_SWT_ACTIVE_SHELL,
+  HOP_SWT_NEW_SHELL,
+  HOP_H2_SERVER,
+  HOP_JDBC_URL,
+}
