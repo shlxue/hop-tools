@@ -117,7 +117,7 @@ public final class AsyncUi implements AutoCloseable {
       CountDownLatch waitFor) {
     try {
       ref.set(callable.call());
-    } catch (Exception e) {
+    } catch (Throwable e) {
       error.set(e);
     } finally {
       waitFor.countDown();

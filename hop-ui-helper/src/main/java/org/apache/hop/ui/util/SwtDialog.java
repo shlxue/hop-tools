@@ -135,30 +135,32 @@ public final class SwtDialog {
     }
     fixNestedFormOffset(shell);
 
-    if ((shell.getStyle() & SWT.RESIZE) != 0 && preferred) {
-      Point hintSize = hintSize(shell);
-      Point preferredSize = preferredSize(shell);
-
-      try {
+    shell.setRedraw(false);
+    try {
+      if ((shell.getStyle() & SWT.RESIZE) != 0 && preferred) {
+        Point hintSize = hintSize(shell);
+        Point preferredSize = preferredSize(shell);
+        shell.setMinimumSize(hintSize);
         if (supportAutoLayout(shell, true)) {
           //        if (supportAutoLayout(
           //            shell, ignoreBottomButtons(shell.getChildren(), shell.getDefaultButton())))
           // {
-          shell.setMinimumSize(preferredSize);
+          shell.setSize(preferredSize);
           //          shell.setMinimumSize(hintSize);
         } else {
-          shell.setMinimumSize(preferredSize.x, hintSize.y);
+          //          shell.setMinimumSize(preferredSize.x, hintSize.y);
+          shell.setSize(preferredSize.x, hintSize.y);
           Point[] templates = Monitors.preferredSizes(hintSize);
           if (templates.length > 0) {
             shellMaximize(shell, templates[Math.min(templates.length - 1, 3)].x, hintSize.y);
           }
-          shell.pack(false);
         }
-      } finally {
-        //        shell.setRedraw(false);
       }
+    } finally {
+      //      shell.pack(false);
+      screenCenter(shell);
+      shell.setRedraw(true);
     }
-    screenCenter(shell);
   }
 
   private static void shellMaximize(Shell shell, int x, int y) {
@@ -201,8 +203,10 @@ public final class SwtDialog {
 
   private static void screenCenter(Shell shell) {
     Point size = shell.getSize();
-    Point clientArea = Monitors.getClientAreaSize(shell.getMonitor());
-    shell.setLocation(new Point((clientArea.x - size.x) / 2, (clientArea.y - size.y) / 2));
+    Point areaSize = Monitors.getClientAreaSize(shell.getMonitor());
+    Point location = Monitors.getClientArea(shell.getMonitor());
+    shell.setLocation(
+        new Point((areaSize.x - size.x) / 2 + location.x, (areaSize.y - size.y) / 2 + location.y));
   }
 
   private static Control[] ignoreBottomButtons(Control[] children, Button defaultButton) {

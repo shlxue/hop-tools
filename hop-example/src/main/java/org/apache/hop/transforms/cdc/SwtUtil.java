@@ -1,7 +1,5 @@
 package org.apache.hop.transforms.cdc;
 
-import com.opennews.hop.jdbc.Index;
-import com.opennews.hop.jdbc.Tab;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.exception.HopValueException;
@@ -12,6 +10,8 @@ import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.apache.hop.transforms.cdc.jdbc.Index;
+import org.apache.hop.transforms.cdc.jdbc.Tab;
 import org.apache.hop.ui.core.ConstUi;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.gui.GuiResource;

@@ -11,10 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.*;
 
 public abstract class AbstractSpecProvider<T, M, E>
     implements Spec<T, M, E>, InvocationInterceptor, AutoCloseable {
@@ -30,6 +32,7 @@ public abstract class AbstractSpecProvider<T, M, E>
   protected T target;
   protected M mode;
   protected E dispatcher;
+  private CountDownLatch specLatch;
 
   protected AbstractSpecProvider(Class<M> modeClass, Function<E, Spec<E, M, E>[]> lazyLoader) {
     this.modeClass = modeClass;
@@ -67,8 +70,12 @@ public abstract class AbstractSpecProvider<T, M, E>
     } catch (Throwable e) {
       logger.error("Init spec failed", e);
     }
+    specLatch = new CountDownLatch(additions.size());
     try (this) {
       this.invoke(target, mode, dispatcher);
+      if (!specLatch.await(10, TimeUnit.MINUTES)) {
+        Assertions.fail("Timed out waiting for spec: " + additions.size());
+      }
     } catch (Throwable t) {
       Assertions.fail("Exec spec " + getClass().getSimpleName(), t);
     } finally {
@@ -78,10 +85,8 @@ public abstract class AbstractSpecProvider<T, M, E>
         errors.clear();
         try {
           Assertions.assertTrue(unknownErrors.isEmpty(), dumpErrors(unknownErrors));
-        } catch (Throwable e) {
-          onPostTest();
-          throw e;
         } finally {
+          onPostTest();
           unknownErrors.clear();
         }
         onPostTest();
@@ -99,6 +104,8 @@ public abstract class AbstractSpecProvider<T, M, E>
   protected void onShellAction(ShellEvent event) {
     additions.forEach(tsSpec -> execSpec(target, mode, dispatcher, tsSpec));
   }
+
+  protected void dispose() {}
 
   @Override
   public void invoke(T target, M mode, E dispatcher) {
@@ -118,6 +125,7 @@ public abstract class AbstractSpecProvider<T, M, E>
         unknownErrors.add(new SimpleEntry<>(spec, throwable));
       }
     } finally {
+      specLatch.countDown();
       if (spec instanceof AutoCloseable closeable) {
         try {
           closeable.close();

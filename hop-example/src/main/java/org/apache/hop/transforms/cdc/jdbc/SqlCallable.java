@@ -1,4 +1,4 @@
-package com.opennews.hop.jdbc;
+package org.apache.hop.transforms.cdc.jdbc;
 
 import java.sql.SQLException;
 

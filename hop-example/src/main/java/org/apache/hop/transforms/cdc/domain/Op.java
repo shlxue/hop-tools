@@ -1,4 +1,4 @@
-package com.opennews.domain;
+package org.apache.hop.transforms.cdc.domain;
 
 public enum Op {
   NONE('N'),

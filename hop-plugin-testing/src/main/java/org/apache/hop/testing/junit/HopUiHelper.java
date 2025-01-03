@@ -11,8 +11,8 @@ import org.junit.platform.commons.util.ReflectionUtils;
 
 import java.util.Optional;
 
-public final class HopHelper {
-  private HopHelper() {}
+public final class HopUiHelper {
+  private HopUiHelper() {}
 
   public static boolean isCorePlugin(Class<?> clazz) {
     return IVariables.class.isAssignableFrom(clazz) || IDatabase.class.isAssignableFrom(clazz);

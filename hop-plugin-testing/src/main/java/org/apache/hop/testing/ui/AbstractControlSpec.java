@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 abstract class AbstractControlSpec<T extends Control> extends AbstractWidgetSpec<T> {
   protected static final String DEBUG_TAB_KEY = "debug.tab";
@@ -63,7 +64,7 @@ abstract class AbstractControlSpec<T extends Control> extends AbstractWidgetSpec
     boolean container = control instanceof Composite;
     gc.setForeground(display.getSystemColor(container ? SWT.COLOR_RED : SWT.COLOR_BLUE));
     gc.setFont(font);
-    Point point = control.getSize();
+    Point point = Objects.requireNonNull(control).getSize();
     FontData fontData = font.getFontData()[0];
     int x = 0, y = 0;
     if (container) {

@@ -38,7 +38,6 @@ import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.action.IAction;
 import org.apache.hop.workflow.engine.IWorkflowEngine;
-import org.eclipse.swt.widgets.Shell;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.platform.commons.util.ClassFilter;
 import org.junit.platform.commons.util.ReflectionUtils;
@@ -59,7 +58,6 @@ public final class HopJunit implements AutoCloseable, IHasHopMetadataProvider {
   private final ILogChannel log;
 
   private final SwtContext swtContext;
-  private Shell shell;
 
   private final List<DatabaseMeta> databaseMetas;
   private IHopMetadataProvider databaseMetaProvider;
@@ -100,14 +98,6 @@ public final class HopJunit implements AutoCloseable, IHasHopMetadataProvider {
 
   public SwtContext getSwtContext() {
     return swtContext;
-  }
-
-  public Shell getShell() {
-    return shell;
-  }
-
-  public void setShell(Shell shell) {
-    this.shell = shell;
   }
 
   public void waitUntilLoaded() {

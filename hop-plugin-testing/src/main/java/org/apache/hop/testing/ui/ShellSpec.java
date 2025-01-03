@@ -3,7 +3,6 @@ package org.apache.hop.testing.ui;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.hop.testing.SpecMode;
 import org.apache.hop.ui.core.widget.ComboVar;
-import org.apache.hop.ui.core.widget.TextComposite;
 import org.apache.hop.ui.core.widget.TextVar;
 import org.apache.hop.ui.util.AsyncUi;
 import org.apache.hop.ui.util.SwtDialog;
@@ -22,6 +21,7 @@ import org.junit.platform.commons.util.ExceptionUtils;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.*;
 
 final class ShellSpec {
   private static final Method getMaximumSizeMethod;
@@ -88,9 +87,12 @@ final class ShellSpec {
       Button wOk = search(Button.class, this::isOkButton);
       Assertions.assertNotNull(wOk, "Not found ok button on the dialog: " + uiName());
       AtomicReference<Throwable> err = new AtomicReference<>();
+      delay(100);
       asyncUi.runInUiThread(() -> notifyOkListener(wOk, err));
-      Assertions.assertDoesNotThrow(
-          err::get, "Received an error:" + ExceptionUtils.readStackTrace(err.get()));
+      if (err.get() != null) {
+        Assertions.assertDoesNotThrow(
+            err::get, "Received an error:" + ExceptionUtils.readStackTrace(err.get()));
+      }
       Assertions.assertDoesNotThrow(
           () -> waitShellDispose(wOk), "Ok listener don't work after trigger the listener");
     }
@@ -120,6 +122,54 @@ final class ShellSpec {
     }
   }
 
+  static class CancelListener extends AbstractShellSpec<Button> {
+    CancelListener(AsyncUi asyncUi) {
+      super(asyncUi, Button.class);
+    }
+
+    @Override
+    public void invoke(Shell target, SpecMode mode, Shell dispatcher) {
+      super.invoke(target, mode, dispatcher);
+      Button wCancel = search(Button.class, this::isCancelButton);
+      Assertions.assertNotNull(wCancel, "Not found cancel button on the dialog: " + uiName());
+      AtomicReference<Throwable> err = new AtomicReference<>();
+      delay(10);
+      asyncUi.runInUiThread(() -> notifyCancelListener(wCancel, err));
+      if (err.get() != null) {
+        Assertions.assertDoesNotThrow(
+            err::get, "Received an error:" + ExceptionUtils.readStackTrace(err.get()));
+      }
+      Assertions.assertDoesNotThrow(
+          () -> waitShellDispose(wCancel), "Ok listener don't work after trigger the listener");
+    }
+
+    private void notifyCancelListener(Button wCancel, AtomicReference<Throwable> err) {
+      try {
+        Event event = new Event();
+        event.widget = wCancel;
+        wCancel.notifyListeners(SWT.Selection, event);
+      } catch (Throwable e) {
+        err.set(e);
+      }
+    }
+
+    private Throwable waitShellDispose(Button wCancel) {
+      long waiting = System.currentTimeMillis() + 1000;
+      try {
+        while (!wCancel.isDisposed()) {
+          delay(5);
+          if (System.currentTimeMillis() < waiting) {
+            throw new IllegalStateException(
+                "Ok listener don't work after waiting for " + waiting + " ms");
+          }
+        }
+      } catch (IllegalStateException e) {
+        return e;
+      }
+      return null;
+    }
+  }
+
   static class PreviewAutoLayout extends AbstractShellSpec<Control> {
     PreviewAutoLayout(AsyncUi asyncUi) {
       super(asyncUi);
@@ -140,7 +190,13 @@ final class ShellSpec {
           Point max = asyncUi.get(() -> maximumSize(shell));
           AtomicBoolean skipDefault = new AtomicBoolean(true);
           Predicate<Point> filter = size -> size.x <= max.x && !skipDefault.get();
+          AtomicInteger tabCount = new AtomicInteger();
+          CTabFolder tabFolder =
+              asyncUi.tryGet(() -> searchTabFolder(shell, tabCount)).orElse(null);
           for (Point size : preferredSizes) {
+            if (tabCount.get() > 0 && tabFolder != null) {
+              asyncUi.runInUiThread(() -> tabFolder.setSelection(tabCount.decrementAndGet()));
+            }
             if (filter.test(size)) {
               size.y = Math.min(max.y, size.y);
               delay();
@@ -155,17 +211,39 @@ final class ShellSpec {
       assertLayout(asyncUi.get(() -> shell.getLayout()));
     }
 
+    private CTabFolder searchTabFolder(Shell shell, AtomicInteger count) {
+      int style = shell.getStyle();
+      if ((style & SWT.MIN) != 0 && (style & SWT.MAX) != 0) {
+        CTabFolder wCTabFolder =
+            (CTabFolder)
+                Arrays.stream(shell.getChildren())
+                    .filter(CTabFolder.class::isInstance)
+                    .findFirst()
+                    .orElse(null);
+        if (wCTabFolder != null) {
+          count.set(wCTabFolder.getItemCount());
+          return wCTabFolder;
+        }
+      }
+      return null;
+    }
+
     private Point screenFix() {
       Rectangle clientArea = asyncUi.get(() -> shell.getMonitor().getClientArea());
       return new Point(clientArea.x, clientArea.y);
     }
 
     private void adjustSize(Point size, String title, Point screenArea, Point screenFix) {
+      shell.setText(String.format("%s size: %s", title, size));
       Point central = new Point(screenArea.x / 2, screenArea.y / 2);
       Point half = new Point(size.x / 2, size.y / 2);
-      shell.setText(String.format("%s size: %s", title, size));
-      shell.setBounds(
-          central.x - half.x + screenFix.x, central.y - half.y + screenFix.y, size.x, size.y);
+      int y = central.y - half.y + screenFix.y;
+      int style = shell.getStyle();
+      if ((style & SWT.MIN) != 0 && (style & SWT.MAX) != 0) {
+        shell.setBounds(screenFix.x, screenFix.y, size.x, size.y);
+      } else {
+        shell.setBounds(central.x - half.x + screenFix.x, y, size.x, size.y);
+      }
     }
 
     private void assertLayout(Layout layout) {
@@ -358,8 +436,7 @@ final class ShellSpec {
             || control instanceof CCombo
             || control instanceof Combo
             || control instanceof TextVar
-            || control instanceof ComboVar
-            || control instanceof TextComposite) {
+            || control instanceof ComboVar) {
           control
               .getClass()
               .getMethod("setText", String.class)

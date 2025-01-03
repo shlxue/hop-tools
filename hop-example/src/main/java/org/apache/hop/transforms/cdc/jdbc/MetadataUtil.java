@@ -1,4 +1,4 @@
-package com.opennews.hop.jdbc;
+package org.apache.hop.transforms.cdc.jdbc;
 
 import lombok.Getter;
 import org.apache.hop.core.IRowSet;
@@ -15,10 +15,10 @@ import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 
 import java.sql.*;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
-import java.util.*;
 
 @Getter
 public final class MetadataUtil {

@@ -1,8 +1,5 @@
 package org.apache.hop.transforms.cdc;
 
-import com.opennews.hop.jdbc.Index;
-import com.opennews.hop.jdbc.MetadataUtil;
-import com.opennews.hop.jdbc.Tab;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.function.FailableConsumer;
 import org.apache.hop.core.Const;
@@ -17,6 +14,9 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.ITransformMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.apache.hop.transforms.cdc.jdbc.Index;
+import org.apache.hop.transforms.cdc.jdbc.MetadataUtil;
+import org.apache.hop.transforms.cdc.jdbc.Tab;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.widget.*;
@@ -35,9 +35,9 @@ import org.eclipse.swt.widgets.*;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -88,30 +88,34 @@ public class SubOpEventDialog extends BaseTransformDialog {
 
     int middle = props.getMiddlePct();
     int margin = PropsUi.getMargin();
-    ModifyListener lsMod = e -> input.setChanged();
+    int style = SWT.SINGLE | SWT.LEFT | SWT.BORDER;
 
     wTransformName =
-        Widgets.text(SWT.SINGLE | SWT.LEFT | SWT.BORDER)
+        Widgets.text(style)
+            .text(transformName)
             .tooltip(i18n("System.Tooltip.TransformName"))
             .layoutData(LData.byTop(null))
+            .onModify(this::onChanged)
             .create(shell);
     Widgets.label(SWT.RIGHT)
         .text(i18n("System.Label.TransformName"))
         .layoutData(LData.on(wTransformName))
         .create(shell);
 
-    wConnection = addConnectionLine(shell, wTransformName, input.getConnection(), lsMod);
+    wConnection = addConnectionLine(shell, wTransformName, input.getConnection(), this::onChanged);
     wConnection.getComboWidget().setToolTipText(i18n("CTL.ToolTip.Connection"));
-    wConnection.setLayoutData(LData.form().left(0).top(wTransformName).right(100).get());
 
     Button wButton =
         Widgets.button(SWT.PUSH)
             .text(i18n("System.Button.Browse"))
-            .layoutData(LData.toRight(wConnection, margin))
+            .layoutData(LData.toRight(wConnection))
             .onSelect(this::selectSchema)
             .create(shell);
-    wSchema = new TextVar(variables, shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-    wSchema.setLayoutData(LData.byRight(wButton, margin * 2));
+    wSchema =
+        Widgets.ofVar(new TextVar(variables, shell, style), TextVar::getTextWidget)
+            .layoutData(LData.byRight(wButton))
+            .onModify(this::onChanged)
+            .apply();
     Widgets.label(SWT.RIGHT)
         .text(i18n("CTL.Label.Schema"))
         .layoutData(LData.on(wSchema))
@@ -120,20 +124,26 @@ public class SubOpEventDialog extends BaseTransformDialog {
     wButton =
         Widgets.button(SWT.PUSH)
             .text(i18n("System.Button.Browse"))
-            .layoutData(LData.toRight(wButton, margin))
+            .layoutData(LData.toRight(wButton))
             .onSelect(this::selectTable)
             .create(shell);
-    wMasterTable = new TextVar(variables, shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-    wMasterTable.setToolTipText(i18n("CTL.ToolTip.MasterTable"));
-    wMasterTable.setLayoutData(LData.byRight(wButton, margin * 2));
+    wMasterTable =
+        Widgets.ofVar(new TextVar(variables, shell, style), TextVar::getTextWidget)
+            .tooltip(i18n("CTL.ToolTip.MasterTable"))
+            .layoutData(LData.byRight(wButton))
+            .onModify(this::onChanged)
+            .apply();
     Widgets.label(SWT.RIGHT)
         .text(i18n("CTL.Label.MasterTable"))
         .layoutData(LData.on(wMasterTable))
         .create(shell);
 
-    wKeyFields = new TextVar(variables, shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-    wKeyFields.setToolTipText(i18n("CTL.ToolTip.KeyFields"));
-    wKeyFields.setLayoutData(LData.byTop(wMasterTable));
+    wKeyFields =
+        Widgets.ofVar(new TextVar(variables, shell, style), TextVar::getTextWidget)
+            .tooltip(i18n("CTL.ToolTip.KeyFields"))
+            .layoutData(LData.byTop(wMasterTable))
+            .onModify(this::onChanged)
+            .apply();
     Widgets.label(SWT.RIGHT)
         .text(i18n("CTL.Label.KeyFields"))
         .layoutData(LData.on(wKeyFields))
@@ -144,6 +154,7 @@ public class SubOpEventDialog extends BaseTransformDialog {
             .text(i18n("CTL.Label.IgnoreAllDelOp"))
             .tooltip(i18n("CTL.Tooltip.IgnoreAllDelOp"))
             .layoutData(LData.byTop(wKeyFields, false))
+            .onSelect(this::onChanged)
             .create(shell);
 
     wIgnoreNonMap =
@@ -151,9 +162,11 @@ public class SubOpEventDialog extends BaseTransformDialog {
             .text(i18n("CTL.Label.IgnoreNonMap"))
             .tooltip(i18n("CTL.Tooltip.IgnoreNonMap"))
             .layoutData(LData.byTop(wIgnoreAllDelOp, false))
+            .onSelect(this::onChanged)
             .create(shell);
 
-    CTabFolder wTabFolder = new CTabFolder(shell, SWT.BORDER);
+    CTabFolder wTabFolder = Widgets.C.tabFolder(SWT.BORDER).create(shell);
+    wTabFolder.addSelectionListener(Adapter.widgetSelected(this::switchTabFolder));
     Composite wGeneral = new Composite(wTabFolder, SWT.NONE);
     Composite wJoinEditor = new Composite(wTabFolder, SWT.NONE);
     Composite wTestData = new Composite(wTabFolder, SWT.NONE);
@@ -167,68 +180,99 @@ public class SubOpEventDialog extends BaseTransformDialog {
     wTabFolder.setSelection(0);
 
     //// General
-    int style =
-        SWT.FULL_SELECTION | SWT.BORDER | SWT.CHECK | SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL;
-
-    Widgets.label(SWT.RIGHT).text(i18n("CTL.Label.Fields")).create(wGeneral);
     Label wLabel =
-        Widgets.label(SWT.RIGHT)
-            .text(i18n("CTL.Label.RelationList"))
-            .layoutData(LData.form().left(middle).get())
-            .create(wGeneral);
-    TableView wFieldView =
-        new TableView(variables, wGeneral, style, SwtUtil.fieldColInfo(), 0, true, lsMod, props);
-    wFieldView.setSortable(false);
-    wFieldView.setReadonly(true);
-    wField = wFieldView.getTable();
-    wField.setToolTipText(i18n("CTL.ToolTip.Fields"));
-    wFieldView.setLayoutData(LData.form().top(wLabel).left(0).right(wLabel).bottom(100).get());
-
-    style =
-        SWT.FULL_SELECTION | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FOCUSED | SWT.RESIZE;
-    TableView wIndexView =
-        new TableView(variables, wGeneral, style, SwtUtil.indexColInfo(), 0, true, lsMod, props);
-    wIndexView.setSortable(false);
-    wIndex = wIndexView.getTable();
-    wIndex.setToolTipText(i18n("CTL.ToolTip.Index"));
-    wIndexView.setLayoutData(LData.byTop(wLabel, 0.5));
-
-    wLabel =
         Widgets.label(SWT.NONE)
-            .text(i18n("CTL.Label.Indexes"))
-            .layoutData(LData.byTop(wIndexView, false))
+            .text(i18n("CTL.Label.RelationList"))
+            .layoutData(LData.byTop(null, false))
             .create(wGeneral);
+    int tableStyle = SWT.FULL_SELECTION | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.RESIZE;
     ColumnInfo[] cols = SwtUtil.tableColInfo();
-    style = SWT.FULL_SELECTION | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.RESIZE;
     wRelationTableView =
-        new TableView(variables, wGeneral, style, cols, 1, false, this::editRelation, props);
-    //    wRelationTableView.setLayoutData(LData.fill(wLabel, null));
+        new TableView(variables, wGeneral, tableStyle, cols, 1, false, this::editRelation, props);
+    wRelationTableView.setLayoutData(
+        LData.form().left(middle).top(wLabel).right(100).bottom(60).get());
     wRelationTableView.setSortable(false);
     wRelationTable = wRelationTableView.getTable();
     wRelationTable.setToolTipText(i18n("CTL.ToolTip.Table"));
     wTableNames = cols[0];
 
+    wLabel =
+        Widgets.label(SWT.NONE)
+            .text(i18n("CTL.Label.Indexes"))
+            .layoutData(LData.byTop(wRelationTableView, false))
+            .create(wGeneral);
+    tableStyle =
+        SWT.FULL_SELECTION | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FOCUSED | SWT.RESIZE;
+    TableView wIndexView =
+        new TableView(
+            variables,
+            wGeneral,
+            tableStyle,
+            SwtUtil.indexColInfo(),
+            0,
+            true,
+            this::onChanged,
+            props);
+    wIndexView.setSortable(false);
+    wIndex = wIndexView.getTable();
+    wIndex.setToolTipText(i18n("CTL.ToolTip.Index"));
+    wIndexView.setLayoutData(LData.form().left(middle).top(wLabel).right(100).bottom(100).get());
+
+    wLabel = Widgets.label(SWT.NONE).text(i18n("CTL.Label.Fields")).create(wGeneral);
+    tableStyle =
+        SWT.FULL_SELECTION | SWT.BORDER | SWT.CHECK | SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL;
+    TableView wFieldView =
+        new TableView(
+            variables,
+            wGeneral,
+            tableStyle,
+            SwtUtil.fieldColInfo(),
+            0,
+            true,
+            this::onChanged,
+            props);
+    wFieldView.setSortable(false);
+    wFieldView.setReadonly(true);
+    wField = wFieldView.getTable();
+    wField.setToolTipText(i18n("CTL.ToolTip.Fields"));
+    wFieldView.setLayoutData(
+        LData.form().left(0).top(wLabel).right(wRelationTableView).bottom(100).get());
+
     //// JoinEditor
     int sqlStyle = SWT.MULTI | SWT.LEFT | SWT.BORDER | SWT.V_SCROLL;
     int sqlReadonlyStyle = sqlStyle | SWT.READ_ONLY;
 
-    wJoinSql = new StyledTextComp(variables, wJoinEditor, sqlStyle);
-    wJoinSql.getTextWidget().setToolTipText(i18n("CTL.ToolTip.JoinSql"));
-    wJoinSql.setLayoutData(LData.byTop(null, 0.3));
+    wJoinSql =
+        Widgets.ofVar(
+                new StyledTextComp(variables, wJoinEditor, sqlStyle), StyledTextComp::getTextWidget)
+            .widget(c -> c.setToolTipText(i18n("CTL.ToolTip.JoinSql")))
+            .layoutData(LData.form().left(middle).top(null).right(100).bottom(30).get())
+            .onModify(this::onChanged)
+            .apply();
     Widgets.label(SWT.RIGHT)
         .text(i18n("CTL.Label.JoinSQL"))
         .layoutData(LData.onTop(wJoinSql))
         .create(wJoinEditor);
 
-    wDesignSql = new StyledTextComp(variables, wJoinEditor, sqlStyle | SWT.READ_ONLY);
-    wDesignSql.getTextWidget().setToolTipText(i18n("CTL.ToolTip.PreviewSql"));
+    wDesignSql =
+        Widgets.ofVar(
+                new StyledTextComp(variables, wJoinEditor, sqlStyle | SWT.READ_ONLY),
+                StyledTextComp::getTextWidget)
+            .widget(c -> c.setToolTipText(i18n("CTL.ToolTip.PreviewSql")))
+            .onModify(this::onChanged)
+            .apply();
     Widgets.label(SWT.RIGHT)
         .text(i18n("CTL.Label.PreviewSql"))
         .layoutData(LData.onTop(wDesignSql))
         .create(wJoinEditor);
 
-    wOrderBy = new StyledTextComp(variables, wJoinEditor, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
-    wOrderBy.setToolTipText(i18n("CTL.ToolTip.OrderBy"));
+    wOrderBy =
+        Widgets.ofVar(
+                new StyledTextComp(variables, wJoinEditor, SWT.SINGLE | SWT.LEFT | SWT.BORDER),
+                StyledTextComp::getTextWidget)
+            .widget(c -> c.setToolTipText(i18n("CTL.ToolTip.OrderBy")))
+            .onModify(this::onChanged)
+            .apply();
     Widgets.label(SWT.RIGHT)
         .text(i18n("CTL.Label.OrderBy"))
         .layoutData(LData.on(wOrderBy))
@@ -239,6 +283,7 @@ public class SubOpEventDialog extends BaseTransformDialog {
             .tooltip(i18n("CTL.ToolTip.JoinLimit"))
             .bounds(1, 255)
             .increment(5, 20)
+            .onModify(this::onChanged)
             .onModify(this::modifyJoinLimit)
             .create(wJoinEditor);
     wJoinLimit.setSelection(1);
@@ -252,23 +297,34 @@ public class SubOpEventDialog extends BaseTransformDialog {
             .text(i18n("CTL.Label.IgnoreDel"))
             .tooltip(i18n("CTL.Tooltip.IgnoreDel"))
             .layoutData(LData.byBottom(null, false))
+            .onSelect(this::onChanged)
             .create(wJoinEditor);
 
     wJoinLimit.setLayoutData(LData.byBottom(wIgnoreDel, 100 - middle));
     wOrderBy.setLayoutData(LData.byBottom(wJoinLimit));
-    //    wDesignSql.setLayoutData(LData.fill(wJoinSql, wOrderBy));
+    wDesignSql.setLayoutData(
+        LData.form().left(middle).top(wJoinSql).right(100).bottom(wOrderBy).get());
 
     //// TestData
-    wConditionSql = new StyledTextComp(variables, wTestData, sqlStyle);
-    wConditionSql.getTextWidget().setToolTipText(i18n("CTL.ToolTip.ConditionSql"));
-    wConditionSql.setLayoutData(LData.byTop(null, 0.3));
+    wConditionSql =
+        Widgets.ofVar(
+                new StyledTextComp(variables, wTestData, sqlStyle), StyledTextComp::getTextWidget)
+            .widget(c -> c.setToolTipText(i18n("CTL.ToolTip.ConditionSql")))
+            .layoutData(LData.byTop(null, 0.3))
+            .onModify(this::onChanged)
+            .apply();
     Widgets.label(SWT.NONE)
         .text(i18n("CTL.Label.ConditionSql"))
         .layoutData(LData.onTop(wConditionSql))
         .create(wTestData);
 
-    wLoadingSql = new StyledTextComp(variables, wTestData, sqlReadonlyStyle);
-    wLoadingSql.getTextWidget().setToolTipText(i18n("CTL.ToolTip.PreviewSql"));
+    wLoadingSql =
+        Widgets.ofVar(
+                new StyledTextComp(variables, wTestData, sqlReadonlyStyle),
+                StyledTextComp::getTextWidget)
+            .widget(c -> c.setToolTipText(i18n("CTL.ToolTip.PreviewSql")))
+            .onModify(this::onChanged)
+            .apply();
     Widgets.label(SWT.NONE)
         .text(i18n("CTL.Label.PreviewSql"))
         .layoutData(LData.onTop(wLoadingSql))
@@ -279,6 +335,7 @@ public class SubOpEventDialog extends BaseTransformDialog {
             .bounds(1, 1000)
             .increment(10, 100)
             .tooltip(i18n("CTL.ToolTip.RowLimit"))
+            .onModify(this::onChanged)
             .create(wTestData);
     wRowLimit.setSelection(100);
     Widgets.label(SWT.RIGHT)
@@ -291,11 +348,14 @@ public class SubOpEventDialog extends BaseTransformDialog {
             .text(i18n("CTL.Label.ShowOriginKey"))
             .tooltip(i18n("CTL.ToolTip.ShowOriginKey"))
             .layoutData(LData.byBottom(null, false))
+            .onSelect(this::onChanged)
             .create(wTestData);
     wRowLimit.setLayoutData(LData.byBottom(wShowOriginKey, 100 - middle));
-    //    wLoadingSql.setLayoutData(LData.fill(wConditionSql, wRowLimit));
+    wLoadingSql.setLayoutData(
+        LData.form().left(middle).top(wConditionSql).right(100).bottom(wRowLimit).get());
 
     setShellImage(shell, input);
+    wTabFolder.setLayoutData(LData.fill(wIgnoreNonMap, shell, -1, false));
     super.wOk =
         Widgets.button(SWT.PUSH).text(i18n("System.Button.OK")).onSelect(this::onOk).create(shell);
     wRefresh =
@@ -314,47 +374,10 @@ public class SubOpEventDialog extends BaseTransformDialog {
             .onSelect(this::onCancel)
             .create(shell);
 
-    wTabFolder.setLayoutData(LData.form().left(0).top(wIgnoreNonMap).right(100).bottom(wOk).get());
-    positionBottomButtons(
-        shell, new Button[] {wOk, wRefresh, wPreview, wCancel}, PropsUi.getMargin(), null);
-
-    SelectionListener listener = Adapter.widgetSelected(e -> input.setChanged());
-    wTransformName.addModifyListener(lsMod);
-    wConnection.getComboWidget().addModifyListener(lsMod);
-    wSchema.getTextWidget().addModifyListener(lsMod);
-    wMasterTable.getTextWidget().addModifyListener(lsMod);
-    wIgnoreDel.addSelectionListener(listener);
-    wIgnoreNonMap.addSelectionListener(listener);
-    wRelationTableView.addModifyListener(lsMod);
-    wIndexView.addModifyListener(lsMod);
-    wFieldView.addModifyListener(lsMod);
-    wJoinSql.getTextWidget().addModifyListener(lsMod);
-    wOrderBy.getTextWidget().addModifyListener(lsMod);
-    wJoinLimit.addSelectionListener(listener);
-    wIgnoreDel.addSelectionListener(listener);
-    wConditionSql.getTextWidget().addModifyListener(lsMod);
-    wRowLimit.addSelectionListener(listener);
-    wShowOriginKey.addSelectionListener(listener);
-
     wRelationTableView.addKeyListener(Adapter.keyPressed(this::searchTable));
-    wTabFolder.addSelectionListener(Adapter.widgetSelected(this::switchTabFolder));
 
+    positionBottomButtons(shell, new Button[] {wOk, wRefresh, wPreview, wCancel}, 0, wTabFolder);
     SwtDialog.preferredShellStyle(shell, wOk);
-  }
-
-  private String i18n(String key, Object... params) {
-    return Util.i18n(SubOpEventMeta.class, key, params);
-  }
-
-  private Optional<Relationship> getRef() {
-    TableItem item = wRelationTableView.getActiveTableItem();
-    if (item == null && wRelationTable.getSelectionIndex() != -1) {
-      item = wRelationTable.getItem(wRelationTable.getSelectionIndex());
-    }
-    if (item != null) {
-      return Optional.ofNullable((Relationship) item.getData());
-    }
-    return Optional.empty();
   }
 
   @Override
@@ -362,6 +385,7 @@ public class SubOpEventDialog extends BaseTransformDialog {
     PropsUi.setLook(shell);
     PropsUi.setLook(wIndex, PropsUi.WIDGET_STYLE_TABLE);
     PropsUi.setLook(wField, PropsUi.WIDGET_STYLE_TABLE);
+    shell.layout(true, true);
 
     wSchema.addModifyListener(this::modifyMasterTable);
     wMasterTable.addModifyListener(this::modifyMasterTable);
@@ -398,6 +422,21 @@ public class SubOpEventDialog extends BaseTransformDialog {
 
     BaseDialog.defaultShellHandling(shell, e -> onOk(null), e -> onCancel(null));
     return transformName;
+  }
+
+  private String i18n(String key, Object... params) {
+    return Util.i18n(SubOpEventMeta.class, key, params);
+  }
+
+  private Optional<Relationship> getRef() {
+    TableItem item = wRelationTableView.getActiveTableItem();
+    if (item == null && wRelationTable.getSelectionIndex() != -1) {
+      item = wRelationTable.getItem(wRelationTable.getSelectionIndex());
+    }
+    if (item != null) {
+      return Optional.ofNullable((Relationship) item.getData());
+    }
+    return Optional.empty();
   }
 
   private void modifyJoinLimit(ModifyEvent event) {
@@ -678,7 +717,7 @@ public class SubOpEventDialog extends BaseTransformDialog {
     logRowlevel(i18n("MSG.SelectRelationInTableView", event.item));
     TableItem item = (TableItem) event.item;
     Optional<Relationship> optional = getRef();
-    if (!optional.isPresent() || item == null) {
+    if (optional.isEmpty() || item == null) {
       return;
     }
     if (StringUtil.isEmpty(item.getText(1))) {
@@ -970,7 +1009,7 @@ public class SubOpEventDialog extends BaseTransformDialog {
     }
   }
 
-  private <T> void onChanged(T event) {
+  <T> void onChanged(T event) {
     input.setChanged();
   }
 

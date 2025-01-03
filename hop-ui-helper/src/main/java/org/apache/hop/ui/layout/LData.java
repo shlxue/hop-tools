@@ -197,6 +197,10 @@ public final class LData {
     return form().top(editor, 0, SWT.CENTER).right(editor).get();
   }
 
+  public static FormData on(Control editor, int wHint) {
+    return form(wHint, SWT.DEFAULT).top(editor, 0, SWT.CENTER).right(editor).get();
+  }
+
   public static FormData onTop(Control editor) {
     return form().top(editor, 0, SWT.TOP).right(editor).get();
   }

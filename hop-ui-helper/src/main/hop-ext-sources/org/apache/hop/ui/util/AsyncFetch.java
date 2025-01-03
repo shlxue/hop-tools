@@ -94,7 +94,7 @@ public class AsyncFetch {
         rowMeta -> fieldNamesConsumer.accept(sortedFieldNames(rowMeta)));
   }
 
-  private String[] sortedFieldNames(IRowMeta rowMeta) {
+  public static String[] sortedFieldNames(IRowMeta rowMeta) {
     String[] fieldNames = rowMeta.getFieldNames();
     Arrays.sort(fieldNames);
     return fieldNames;
@@ -139,7 +139,11 @@ public class AsyncFetch {
                 T result = callable.call();
                 logger.config(
                     "Async fetch ui data: " + (result != null ? result.getClass().getName() : ""));
-                display.asyncExec(() -> onCompleted.accept(result));
+                display.asyncExec(() -> {
+                  if (result != null) {
+                    onCompleted.accept(result);
+                  }
+                });
               } catch (Throwable throwable) {
                 display.asyncExec(() -> onError.accept(throwable));
                 logger.warning("Error executing async call: " + throwable.getMessage());

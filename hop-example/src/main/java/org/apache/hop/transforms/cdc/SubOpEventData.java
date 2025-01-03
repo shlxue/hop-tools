@@ -1,11 +1,11 @@
 package org.apache.hop.transforms.cdc;
 
-import com.opennews.domain.OpLog;
 import org.apache.hop.core.IRowSet;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.pipeline.transform.BaseTransformData;
+import org.apache.hop.transforms.cdc.domain.OpLog;
 
 import java.sql.PreparedStatement;
 import java.util.function.BiFunction;

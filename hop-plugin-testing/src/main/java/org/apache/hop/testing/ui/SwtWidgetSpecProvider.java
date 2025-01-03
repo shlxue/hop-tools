@@ -26,6 +26,7 @@ class SwtWidgetSpecProvider<T extends Widget> extends AbstractSpecProvider<T, Sp
 
   @Override
   public void close() {
+    target.dispose();
     dispatcher.dispose();
     asyncUi.close();
   }

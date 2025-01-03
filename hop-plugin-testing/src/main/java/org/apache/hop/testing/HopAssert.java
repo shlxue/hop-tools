@@ -1,6 +1,7 @@
 package org.apache.hop.testing;
 
 import org.apache.hop.core.Result;
+import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.pipeline.engine.EngineComponent;
 import org.apache.hop.pipeline.transform.BaseTransform;
@@ -11,19 +12,19 @@ import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public final class HopAsserts {
+public final class HopAssert {
 
-  public static void assertTrans(Pipeline trans, boolean run, boolean stop, boolean finish) {
+  public static void assertTransform(Pipeline trans, boolean run, boolean stop, boolean finish) {
     //    assertThat(trans.isRunning()).isEqualTo(run);
     //    assertThat(trans.isStopped()).isEqualTo(stop);
     //    assertThat(trans.isFinished()).isEqualTo(finish);
   }
 
-  public static void assertTrans(
+  public static void assertTransform(
       Pipeline trans, boolean run, boolean stop, boolean finish, boolean init, boolean prepare) {
     //    assertThat(trans.isInitializing()).isEqualTo(init);
     //    assertThat(trans.isPreparing()).isEqualTo(prepare);
-    assertTrans(trans, run, stop, finish);
+    assertTransform(trans, run, stop, finish);
   }
 
   public static void assertResult(
@@ -57,6 +58,8 @@ public final class HopAsserts {
     //    assertThat(actual.getNrLinesDeleted()).isEqualTo(deleted);
     //    assertThat(actual.getNrLinesRejected()).isEqualTo(rejected);
   }
+
+  public static void assertRows(ITransform transform, int nrRows, IRowMeta rowMeta) {}
 
   public static void assertLines(
       Result actual, long input, long output, long read, long u, long w, long d, long r) {

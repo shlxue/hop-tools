@@ -1,8 +1,8 @@
 package org.apache.hop.testing.params;
 
 import org.apache.hop.core.variables.IVariables;
-import org.apache.hop.testing.junit.HopHelper;
 import org.apache.hop.testing.junit.HopJunit;
+import org.apache.hop.testing.junit.HopUiHelper;
 import org.apache.hop.testing.junit.StatusUtil;
 import org.apache.hop.testing.junit.StoreKey;
 import org.apache.hop.workflow.WorkflowMeta;
@@ -38,7 +38,7 @@ class ActionUiParamResolver extends BaseUiTypeParamResolver<Dialog, IActionDialo
     Class<IAction> type = (Class<IAction>) constructor.getParameterTypes()[1];
     IAction action =
         hopJunit.newAction(
-            HopHelper.toSafeType(IAction.class, type, constructor.getDeclaringClass()));
+            HopUiHelper.toSafeType(IAction.class, type, constructor.getDeclaringClass()));
     return constructor.newInstance(
         parent, action, action.getParentWorkflowMeta(), hopJunit.newVariables());
   }

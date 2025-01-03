@@ -3,17 +3,21 @@ package org.apache.hop.testing.ui;
 import org.apache.hop.pipeline.transform.ITransformDialog;
 import org.apache.hop.testing.SpecMode;
 import org.apache.hop.testing.junit.AbstractSpecProvider;
-import org.apache.hop.testing.junit.HopHelper;
+import org.apache.hop.testing.junit.HopUiHelper;
 import org.apache.hop.testing.junit.Spec;
 import org.apache.hop.ui.util.AsyncUi;
 import org.apache.hop.ui.util.SwtDialog;
 import org.apache.hop.workflow.action.IActionDialog;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.junit.jupiter.api.Assertions;
 
+import java.util.Arrays;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -21,15 +25,25 @@ import java.util.function.Function;
 class SwtDialogSpecProvider<T extends Dialog> extends AbstractSpecProvider<T, SpecMode, Shell> {
   protected final Display display;
   protected final AsyncUi asyncUi;
-  private AtomicReference<Shell> subShell = new AtomicReference<>();
+  private final AtomicReference<Shell> subShell = new AtomicReference<>();
+  private final boolean usingOpenMode;
 
   SwtDialogSpecProvider(
       Display display,
       AsyncUi asyncUi,
       Function<Shell, Spec<Shell, SpecMode, Shell>[]> lazyLoader) {
+    this(display, asyncUi, false, lazyLoader);
+  }
+
+  SwtDialogSpecProvider(
+      Display display,
+      AsyncUi asyncUi,
+      boolean usingOpenMode,
+      Function<Shell, Spec<Shell, SpecMode, Shell>[]> lazyLoader) {
     super(SpecMode.class, lazyLoader);
     this.display = display;
     this.asyncUi = asyncUi;
+    this.usingOpenMode = usingOpenMode;
     asyncUi.getWaitLatch();
   }
 
@@ -85,7 +99,10 @@ class SwtDialogSpecProvider<T extends Dialog> extends AbstractSpecProvider<T, Sp
   @Override
   public void invoke(T target, SpecMode mode, Shell dispatcher) {
     super.invoke(target, mode, dispatcher);
-    if (HopHelper.isPluginUi(target.getClass()) && !isConstructorBuilder(dispatcher)) {
+    Shell[] shells = dispatcher.getDisplay().getShells();
+    System.out.println(shells.length);
+    if (usingOpenMode
+        || HopUiHelper.isPluginUi(target.getClass()) && !isConstructorBuilder(dispatcher)) {
       legacyShellHanding(target, mode.isColorized());
       return;
     }
@@ -103,10 +120,23 @@ class SwtDialogSpecProvider<T extends Dialog> extends AbstractSpecProvider<T, Sp
   private void legacyShellHanding(T dialog, boolean visible) {
     int count = dispatcher.getShells().length;
     asyncUi.asyncExec(() -> onActionDialog(count, visible));
+    Callable<?> open = null;
     if (dialog instanceof ITransformDialog transformDialog) {
-      transformDialog.open();
+      open = transformDialog::open;
     } else if (dialog instanceof IActionDialog actionDialog) {
-      actionDialog.open();
+      open = actionDialog::open;
+    }
+    if (open != null) {
+      Callable<?> activeUi = open;
+      try {
+        open.call();
+      } catch (Throwable e) {
+        Assertions.fail("Active plugin ui", e);
+      }
+      //      asyncUi.asyncExec(() -> asyncUi.runInUiThread(activeUi));
+      // asyncUi.asyncExec(() -> onActionDialog(count, visible));
+    } else {
+      Assertions.fail("Invalid hop plugin ui by dialog " + dialog.getClass());
     }
   }
 
@@ -122,6 +152,14 @@ class SwtDialogSpecProvider<T extends Dialog> extends AbstractSpecProvider<T, Sp
         asyncUi.sleepMs(1);
       }
     }
+    if (usingOpenMode) {
+      Shell shell = subShell.get();
+      asyncUi.runInUiThread(shell::setActive);
+      System.out.println(Integer.toHexString(shell.hashCode()));
+      while (!asyncUi.runInUiThread(() -> isVisible(shell)).orElse(false)) {
+        asyncUi.sleepMs(2);
+      }
+    }
     //    beforeActionShell.accept(subShell.get());
     if (visible != null) {
       asyncUi.runInUiThread(() -> onActiveShell(subShell.get(), visible));
@@ -129,11 +167,15 @@ class SwtDialogSpecProvider<T extends Dialog> extends AbstractSpecProvider<T, Sp
     onShellAction(null);
   }
 
+  private boolean isVisible(Shell shell) {
+    return shell.isVisible() || Arrays.stream(shell.getChildren()).anyMatch(Control::isVisible);
+  }
+
   private void onActiveShell(Shell shell, Boolean visible) {
     if (Boolean.TRUE.equals(visible)) {
       adjustSize(shell, shell.getSize(), SwtDialog.screenSize(shell), screenFix(shell));
     } else if (visible != null) {
-      shell.setVisible(false);
+      //      shell.setVisible(false);
     }
   }
 
@@ -142,8 +184,8 @@ class SwtDialogSpecProvider<T extends Dialog> extends AbstractSpecProvider<T, Sp
     Point half = new Point(size.x / 2, size.y / 2);
     //    shell.setLocation(central.x - half.x + screenFix.x, central.y - half.y + screenFix.y);
     //    shell.setSize(size);
-    shell.setBounds(
-        central.x - half.x + screenFix.x, central.y - half.y + screenFix.y, size.x, size.y);
+    //    shell.setBounds(
+    //        central.x - half.x + screenFix.x, central.y - half.y + screenFix.y, size.x, size.y);
   }
 
   private Point screenFix(Shell shell) {

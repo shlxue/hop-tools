@@ -11,4 +11,7 @@ import org.apache.hop.pipeline.transform.BaseTransformMeta;
 public class Demo1Meta extends BaseTransformMeta<Demo1, Demo1Data> {
   private String connection;
   private int age;
+  private String content;
+  private int type;
+  private int customType;
 }

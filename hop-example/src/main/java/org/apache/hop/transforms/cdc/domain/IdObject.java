@@ -1,4 +1,4 @@
-package com.opennews.domain;
+package org.apache.hop.transforms.cdc.domain;
 
 import java.util.Objects;
 import java.util.function.UnaryOperator;

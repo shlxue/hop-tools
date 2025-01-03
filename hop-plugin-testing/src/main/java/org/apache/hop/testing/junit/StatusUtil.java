@@ -28,7 +28,7 @@ public final class StatusUtil {
 
   public static SpecMode uiSpec(HopEnv hopEnv) {
     return get(
-        HOP_JUNIT_UI, SpecMode::valueOf, isNull(hopEnv) ? null : hopEnv::ui, SpecMode.NORMAL);
+        HOP_JUNIT_UI, SpecMode::valueOf, isNull(hopEnv) ? null : hopEnv::ui, SpecMode.STRICT);
   }
 
   public static boolean withH2(HopEnv hopEnv) {

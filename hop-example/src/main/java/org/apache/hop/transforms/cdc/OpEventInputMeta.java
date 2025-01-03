@@ -1,7 +1,5 @@
 package org.apache.hop.transforms.cdc;
 
-import com.opennews.hop.jdbc.Index;
-import com.opennews.hop.jdbc.Tab;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.CheckResult;
@@ -32,19 +30,21 @@ import org.apache.hop.pipeline.transform.stream.IStream;
 import org.apache.hop.pipeline.transform.stream.IStream.StreamType;
 import org.apache.hop.pipeline.transform.stream.Stream;
 import org.apache.hop.pipeline.transform.stream.StreamIcon;
+import org.apache.hop.transforms.cdc.jdbc.Index;
+import org.apache.hop.transforms.cdc.jdbc.Tab;
 import org.w3c.dom.Node;
 
 import java.sql.DatabaseMetaData;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.*;
 
 @ParentFirst(
     patterns = {
-      "^com.opennews.domain.OpLog$",
-      "^com.opennews.domain.Op$",
-      "^com.opennews.domain.MixedKey$",
+      "^org.apache.hop.transforms.cdc.domain.domain.OpLog$",
+      "^org.apache.hop.transforms.cdc.domain.domain.Op$",
+      "^org.apache.hop.transforms.cdc.domain.domain.MixedKey$",
       "^com.opennews.domain.trans.TransMessage$"
     })
 @Transform(

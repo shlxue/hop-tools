@@ -2,7 +2,7 @@ package org.apache.hop.testing.extension;
 
 import org.apache.hop.testing.HopEnv;
 import org.apache.hop.testing.SpecMode;
-import org.apache.hop.testing.junit.HopHelper;
+import org.apache.hop.testing.junit.HopUiHelper;
 import org.apache.hop.testing.junit.StatusUtil;
 import org.apache.hop.testing.junit.StoreKey;
 import org.apache.hop.testing.junit.SwtContext;
@@ -32,13 +32,13 @@ class SwtTestTemplateExtension implements TestTemplateInvocationContextProvider 
       return false;
     }
     Class<?> paramType = testMethod.getParameterTypes()[0];
-    if (!HopHelper.isSwtWidget(paramType) && !HopHelper.isSwtDialog(paramType)) {
+    if (!HopUiHelper.isSwtWidget(paramType) && !HopUiHelper.isSwtDialog(paramType)) {
       return false;
     }
     Preconditions.condition(
         AnnotationUtils.isAnnotated(testMethod, TestTemplate.class),
         () -> "Not found @TestTemplate annotation on test method " + testMethod.getName());
-    return !HopHelper.isPluginDialog(paramType);
+    return !HopUiHelper.isPluginDialog(paramType);
   }
 
   @Override
@@ -76,7 +76,7 @@ class SwtTestTemplateExtension implements TestTemplateInvocationContextProvider 
   }
 
   private ParameterResolver swtParamResolver(Class<?> paramType) {
-    return HopHelper.isSwtWidget(paramType)
+    return HopUiHelper.isSwtWidget(paramType)
         ? ParameterResolvers.swtWidget()
         : ParameterResolvers.swtDialog();
   }

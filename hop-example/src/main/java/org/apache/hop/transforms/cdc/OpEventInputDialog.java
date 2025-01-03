@@ -1,7 +1,5 @@
 package org.apache.hop.transforms.cdc;
 
-import com.opennews.hop.jdbc.MetadataUtil;
-import com.opennews.hop.jdbc.Tab;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
@@ -11,8 +9,9 @@ import org.apache.hop.core.util.StringUtil;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.transforms.cdc.jdbc.MetadataUtil;
+import org.apache.hop.transforms.cdc.jdbc.Tab;
 import org.apache.hop.ui.core.PropsUi;
-import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.widget.MetaSelectionLine;
 import org.apache.hop.ui.core.widget.StyledTextComp;
 import org.apache.hop.ui.core.widget.TableView;
@@ -33,8 +32,8 @@ import org.eclipse.swt.widgets.*;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class OpEventInputDialog extends BaseTransformDialog {
   private static final Class<?> PKG = OpEventInputMeta.class;
@@ -275,12 +274,13 @@ public class OpEventInputDialog extends BaseTransformDialog {
     PropsUi.setLook(shell);
     PropsUi.setLook(wIndex, PropsUi.WIDGET_STYLE_TABLE);
     PropsUi.setLook(wField, PropsUi.WIDGET_STYLE_TABLE);
+    shell.layout(true, true);
 
     getData();
     //        setTableFieldCombo();
     input.setChanged(changed);
 
-    BaseDialog.defaultShellHandling(shell, e -> ok(null), c -> cancel(null));
+    SwtDialog.defaultShellHanding(shell, this::ok, this::cancel);
     return transformName;
   }
 
@@ -552,7 +552,7 @@ public class OpEventInputDialog extends BaseTransformDialog {
     //        shell, variables, meta, metadataProvider, wRowLimit.getSelection(), transformName);
   }
 
-  private <T> void onChanged(T event) {
+  <T> void onChanged(T event) {
     input.setChanged();
   }
 

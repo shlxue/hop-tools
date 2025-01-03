@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-final class Data {
+public final class Data {
   static final String UI_LABEL = "swt.ui.label";
   static final String UI_EDITOR = "swt.ui.editor";
   static final String UI_ACTION = "swt.ui.action";
@@ -54,12 +54,12 @@ final class Data {
     }
   }
 
-  static <T> T get(Widget widget, Class<T> clazz, String key) {
+  public static <T> T get(Widget widget, Class<T> clazz, String key) {
     return tryGet(widget, clazz, key)
         .orElseThrow(() -> new IllegalArgumentException("No data found for key " + key));
   }
 
-  static <T> Optional<T> tryGet(Widget widget, Class<T> clazz, String key) {
+  public static <T> Optional<T> tryGet(Widget widget, Class<T> clazz, String key) {
     Object value = widget.getData(key);
     if (value != null) {
       isAssignable(clazz, value.getClass(), () -> "Wrong data type for key " + key);

@@ -13,6 +13,7 @@ import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.dialog.EnterNumberDialog;
 import org.apache.hop.ui.core.dialog.EnterTextDialog;
 import org.apache.hop.ui.core.dialog.PreviewRowsDialog;
+import org.apache.hop.ui.core.widget.TextVar;
 import org.apache.hop.ui.layout.LData;
 import org.apache.hop.ui.layout.Layouts;
 import org.apache.hop.ui.pipeline.dialog.PipelinePreviewProgressDialog;
@@ -23,6 +24,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -32,32 +34,27 @@ public class HopHelper {
 
   private HopHelper() {}
 
-
   public static Optional<String> fileDialog(Shell shell, VfsConfig cfg) {
-//    FileDialog dialog = new FileDialog(shell);
-//    if (!isEmpty(cfg.getTitle())) {
-//      dialog.setText(cfg.getTitle());
-//    }
-//    if (!isEmpty(cfg.getBasePath())) {
-//      dialog.setFilterPath(cfg.getBasePath());
-//    }
-    return Optional.empty();
+    Control editor = cfg.editor(Control.class);
+    if (editor != null) {
+      return Optional.ofNullable(
+          BaseDialog.presentFileDialog(false, shell, cfg.fileExtensions(), cfg.fileNames(), false));
+    }
+    IVariables variables = null;
+    TextVar wText = textVar(cfg.editor(TextVar.class));
+    return Optional.ofNullable(
+        BaseDialog.presentFileDialog(
+            false, shell, wText, variables, cfg.fileExtensions(), cfg.fileNames(), false));
+  }
+
+  private static TextVar textVar(Control editor) {
+    return (TextVar) editor;
   }
 
   static Optional<String> directoryDialog(Shell shell, VfsConfig cfg) {
-    IVariables variables = null;
-    BaseDialog.presentDirectoryDialog(shell, variables);
-//    DirectoryDialog dialog = new DirectoryDialog(shell);
-//    if (!isEmpty(cfg.getTitle())) {
-//      dialog.setText(cfg.getTitle());
-//    }
-//    if (!isEmpty(cfg.getMessage())) {
-//      dialog.setMessage(cfg.getMessage());
-//    }
-//    if (!isEmpty(cfg.getBasePath())) {
-//      dialog.setFilterPath(cfg.getBasePath());
-//    }
-    return Optional.empty();
+    TextVar wText = textVar(cfg.editor(Text.class));
+    return Optional.ofNullable(
+        BaseDialog.presentDirectoryDialog(shell, wText, cfg.message(), null));
   }
 
   public static void bind(

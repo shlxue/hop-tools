@@ -1,9 +1,9 @@
 package org.apache.hop.transforms.cdc;
 
-import com.opennews.domain.MixedKey;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.hop.transforms.cdc.domain.MixedKey;
 
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;

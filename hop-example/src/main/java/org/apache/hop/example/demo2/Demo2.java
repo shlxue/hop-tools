@@ -9,8 +9,8 @@ import org.apache.hop.workflow.action.ActionBase;
 @Getter
 @Setter
 @Action(id = "Demo2.Name", name = "Demo2.Description")
-public class ActionAbort extends ActionBase {
-  private String name;
+public class Demo2 extends ActionBase {
+  private String value;
 
   @Override
   public Result execute(Result result, int i) {

@@ -27,6 +27,10 @@ abstract class AbstractShellSpec<C extends Control> extends AbstractCompositeSpe
     return isButton(control, "&OK");
   }
 
+  protected boolean isCancelButton(Control control) {
+    return isButton(control, "&Cancel");
+  }
+
   protected final <T extends Control> boolean isButton(T control, String text) {
     return control instanceof Button btn && btn.getText().contains(text);
   }

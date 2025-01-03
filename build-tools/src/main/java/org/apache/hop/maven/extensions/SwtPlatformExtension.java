@@ -4,6 +4,8 @@ import org.apache.maven.AbstractMavenLifecycleParticipant;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.ProjectBuildingRequest;
+import org.apache.maven.shared.utils.logging.MessageBuilder;
+import org.apache.maven.shared.utils.logging.MessageUtils;
 import org.codehaus.plexus.component.annotations.Component;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.slf4j.Logger;
@@ -27,7 +29,7 @@ public class SwtPlatformExtension extends AbstractMavenLifecycleParticipant {
     Properties props = new Properties();
     props.putIfAbsent(SWT_OSGI_PLATFORM, osgiPlatform);
     injectDynamicProps(session, props);
-    log.info(message(SWT_OSGI_PLATFORM, osgiPlatform));
+    log.info("{}", message(SWT_OSGI_PLATFORM, osgiPlatform));
   }
 
   private void injectDynamicProps(MavenSession session, Properties props) {
@@ -67,13 +69,15 @@ public class SwtPlatformExtension extends AbstractMavenLifecycleParticipant {
     if (value.startsWith("hpux")) return "hpux";
     if (value.startsWith("os400") && (value.length() <= 5 || !Character.isDigit(value.charAt(5))))
       return "os400";
-    if (value.startsWith("linux")) return "linux";
+    String linux = "linux";
+    if (value.startsWith(linux)) return linux;
     if (value.startsWith("macosx") || value.startsWith("osx")) return "osx";
     if (value.startsWith("freebsd")) return "freebsd";
     if (value.startsWith("openbsd")) return "openbsd";
     if (value.startsWith("netbsd")) return "netbsd";
     if (value.startsWith("solaris") || value.startsWith("sunos")) return "sunos";
-    if (value.startsWith("windows")) return "windows";
+    String win = "windows";
+    if (value.startsWith(win)) return win;
     if (value.startsWith("zos")) return "zos";
     return "unknown";
   }
@@ -110,14 +114,13 @@ public class SwtPlatformExtension extends AbstractMavenLifecycleParticipant {
     return value.toLowerCase(Locale.US).replaceAll("[^a-z0-9]+", "");
   }
 
-  private String message(String key, String value) {
-    return Buffers.builder()
+  private MessageBuilder message(String key, String value) {
+    return MessageUtils.buffer()
         .a("Native ")
         .strong("SWT")
         .a(" library artifact id by ")
         .failure(key)
         .a(": ")
-        .success(value)
-        .toString();
+        .success(value);
   }
 }

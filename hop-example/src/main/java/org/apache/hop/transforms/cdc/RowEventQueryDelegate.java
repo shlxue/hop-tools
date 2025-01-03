@@ -1,15 +1,15 @@
 package org.apache.hop.transforms.cdc;
 
-import com.opennews.domain.FinishType;
-import com.opennews.domain.MixedKey;
-import com.opennews.domain.Op;
-import com.opennews.domain.OpLog;
 import org.apache.hop.core.IRowSet;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.util.StringUtil;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.transforms.cdc.domain.FinishType;
+import org.apache.hop.transforms.cdc.domain.MixedKey;
+import org.apache.hop.transforms.cdc.domain.Op;
+import org.apache.hop.transforms.cdc.domain.OpLog;
 
 import java.util.HashSet;
 import java.util.List;

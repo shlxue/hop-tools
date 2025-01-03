@@ -63,7 +63,7 @@ class AbstractWidgetSpec<T extends Widget> implements Spec<T, SpecMode, Shell>, 
   }
 
   protected final String uiName() {
-    if (shell == null) {
+    if (shell != null) {
       return to(shell.getClass());
     }
     return "";

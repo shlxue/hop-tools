@@ -1,4 +1,4 @@
-package com.opennews.domain;
+package org.apache.hop.transforms.cdc.domain;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;

@@ -1,9 +1,5 @@
 package org.apache.hop.transforms.cdc;
 
-import com.opennews.domain.*;
-import com.opennews.hop.jdbc.Index;
-import com.opennews.hop.jdbc.MetadataUtil;
-import com.opennews.hop.jdbc.Tab;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.exception.HopValueException;
 import org.apache.hop.core.row.IRowMeta;
@@ -14,14 +10,18 @@ import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.util.StringUtil;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.transforms.cdc.domain.*;
+import org.apache.hop.transforms.cdc.jdbc.Index;
+import org.apache.hop.transforms.cdc.jdbc.MetadataUtil;
+import org.apache.hop.transforms.cdc.jdbc.Tab;
 
 import java.lang.reflect.Method;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.*;
 
 final class Util {
   private static final boolean STRICT_KEY_VAL = Boolean.getBoolean("STRICT_KEY_VAL");

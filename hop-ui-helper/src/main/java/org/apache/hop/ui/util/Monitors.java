@@ -29,7 +29,7 @@ final class Monitors {
     DEFAULT_SCREEN_SIZE = to(primaryMonitor.getClientArea());
     DIALOG_SIZES =
         new Point[] {
-          new Point(480, 272),
+          new Point(350, 135),
           new Point(640, 350),
           new Point(800, 480),
           new Point(960, 540),
@@ -51,6 +51,11 @@ final class Monitors {
       DEFAULT_SCREEN_SIZE.y = size.y;
     }
     return DEFAULT_SCREEN_SIZE;
+  }
+
+  static Point getClientArea(Monitor monitor) {
+    Rectangle clientArea = monitor.getClientArea();
+    return new Point(clientArea.x, clientArea.y);
   }
 
   static Point getClientAreaSize(Monitor monitor) {

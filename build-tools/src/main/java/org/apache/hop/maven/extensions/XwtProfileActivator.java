@@ -5,6 +5,8 @@ import org.apache.maven.model.Profile;
 import org.apache.maven.model.building.ModelProblemCollector;
 import org.apache.maven.model.profile.ProfileActivationContext;
 import org.apache.maven.model.profile.activation.ProfileActivator;
+import org.apache.maven.shared.utils.logging.MessageBuilder;
+import org.apache.maven.shared.utils.logging.MessageUtils;
 import org.codehaus.plexus.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +39,7 @@ public class XwtProfileActivator implements ProfileActivator {
       active = match(xwtType, profile);
       if (active) {
         if (counter == 0) {
-          log.info(message(profile));
+          log.info("{}", message(profile));
         }
         counter++;
       }
@@ -85,7 +87,7 @@ public class XwtProfileActivator implements ProfileActivator {
             || act.getFile() != null);
   }
 
-  private String message(Profile profile) {
-    return Buffers.builder().a("Auto active profile: ").success(profile.getId()).toString();
+  private MessageBuilder message(Profile profile) {
+    return MessageUtils.buffer().a("Auto active profile: ").success(profile.getId());
   }
 }

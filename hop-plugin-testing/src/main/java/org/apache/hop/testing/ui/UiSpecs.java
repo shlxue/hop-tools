@@ -2,9 +2,6 @@ package org.apache.hop.testing.ui;
 
 import org.apache.hop.testing.SpecMode;
 import org.apache.hop.testing.junit.Spec;
-import org.apache.hop.testing.ui.ShellSpec.CheckAutoLayout;
-import org.apache.hop.testing.ui.ShellSpec.PreviewAutoLayout;
-import org.apache.hop.testing.ui.ShellSpec.Tags;
 import org.apache.hop.ui.util.AsyncUi;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Dialog;
@@ -16,6 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 public final class UiSpecs<W> {
   static final int[] SWT_COLORS =
@@ -61,24 +59,30 @@ public final class UiSpecs<W> {
     return build(true);
   }
 
-  @SuppressWarnings("unchecked")
-  private boolean isCloseSpec(Spec spec) {
-    return spec instanceof ShellSpec.DelayClose || specs instanceof ShellSpec.AutoClose;
+  public InvocationInterceptor build(boolean clean) {
+    return build(clean, false);
   }
 
   @SuppressWarnings("unchecked")
-  public InvocationInterceptor build(boolean clean) {
+  private boolean isCloseSpec(Spec spec) {
+    return spec instanceof ShellSpec.DelayClose
+        || specs instanceof ShellSpec.AutoClose
+        || spec instanceof ShellSpec.OkListener
+        || spec instanceof ShellSpec.CancelListener;
+  }
+
+  @SuppressWarnings("unchecked")
+  public InvocationInterceptor build(boolean clean, boolean actionPlugin) {
     if (specs.stream().noneMatch(this::isCloseSpec)) {
       add(new ShellSpec.AutoClose(asyncUi));
     }
     try {
       List<Spec> uiSpecs = new ArrayList<>(specs);
+      Function<Shell, Spec<Shell, SpecMode, Shell>[]> func = shell -> uiSpecs.toArray(Spec[]::new);
       if (Dialog.class.isAssignableFrom(paramType)) {
-        return new SwtDialogSpecProvider<>(
-            parent.getDisplay(), asyncUi, shell -> uiSpecs.toArray(Spec[]::new));
+        return new SwtDialogSpecProvider<>(parent.getDisplay(), asyncUi, actionPlugin, func);
       }
-      return new SwtWidgetSpecProvider<>(
-          parent.getDisplay(), asyncUi, shell -> uiSpecs.toArray(Spec[]::new));
+      return new SwtWidgetSpecProvider<>(parent.getDisplay(), asyncUi, func);
     } finally {
       if (clean) {
         specs.clear();
@@ -89,7 +93,7 @@ public final class UiSpecs<W> {
   }
 
   public UiSpecs<W> previewAutoLayout() {
-    return add(new PreviewAutoLayout(asyncUi));
+    return add(new ShellSpec.PreviewAutoLayout(asyncUi));
   }
 
   public UiSpecs<W> buildUi() {
@@ -108,12 +112,16 @@ public final class UiSpecs<W> {
     return add(new ShellSpec.OkListener(asyncUi));
   }
 
+  public UiSpecs<W> cancelListener() {
+    return add(new ShellSpec.CancelListener(asyncUi));
+  }
+
   public UiSpecs<W> minimum() {
     return add(new ShellSpec.Minimum(asyncUi));
   }
 
   public UiSpecs<W> checkAutoLayout() {
-    return add(new CheckAutoLayout(asyncUi));
+    return add(new ShellSpec.CheckAutoLayout(asyncUi));
   }
 
   public UiSpecs<W> switchFocus() {
@@ -129,7 +137,7 @@ public final class UiSpecs<W> {
   }
 
   public UiSpecs<W> tags() {
-    return add(new Tags(asyncUi));
+    return add(new ShellSpec.Tags(asyncUi));
   }
 
   public UiSpecs<W> delayClose() {

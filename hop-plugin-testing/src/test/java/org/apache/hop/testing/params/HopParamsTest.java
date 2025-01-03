@@ -10,7 +10,7 @@ import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(HopExtension.class)
-@HopEnv(ui = SpecMode.NONE)
+@HopEnv(ui = SpecMode.DEBUG)
 class HopParamsTest {
 
   @TestTemplate

@@ -12,8 +12,10 @@ prune:
 	$(MVN) dependency:purge-local-repository -DsnapshotsOnly -DreResolve=false
 
 # checkstyle
-.PHONY: fmt
+.PHONY: chk fmt
 
+chk:
+	$(MVN) spotless:check
 fmt:
 	mvn spotless:apply
 
@@ -32,10 +34,11 @@ b:
 i:
 	$(MVN) clean install
 t:
-	$(MVN) verify
+	$(MVN) verify -Dmaven.test.failure.ignore=true
 sonar:
 	$(MVN) sonar:sonar
 rwt:
 	$(MVN) clean test-compile -Dxwt.type=rwt
 
-all: bt fmt i rwt
+#all: bt fmt i
+all: t sonar

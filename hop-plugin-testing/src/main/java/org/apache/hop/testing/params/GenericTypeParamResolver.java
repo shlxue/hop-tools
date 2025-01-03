@@ -9,11 +9,7 @@ import org.junit.platform.commons.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,10 +30,16 @@ abstract class GenericTypeParamResolver<T, I> implements ParameterResolver {
     ParameterizedType superclass = findTypeBasedParameterResolverSuperclass(this.getClass());
     Preconditions.notNull(
         superclass, "Failed to discover parameter type supported by %s" + getClass().getName());
-    this.paramType = superclass.getActualTypeArguments()[0];
-    this.interfaceClass = (Class<I>) superclass.getActualTypeArguments()[1];
-    logger.trace(
-        "Create param resolver for {} & {}", paramType.getTypeName(), interfaceClass.getName());
+    Type[] types = superclass.getActualTypeArguments();
+    if (types.length >= 2) {
+      this.paramType = superclass.getActualTypeArguments()[0];
+      this.interfaceClass = (Class<I>) superclass.getActualTypeArguments()[1];
+      logger.trace(
+          "Create param resolver for {} & {}", paramType.getTypeName(), interfaceClass.getName());
+    } else {
+      this.paramType = null;
+      this.interfaceClass = null;
+    }
   }
 
   @Override
@@ -86,7 +88,7 @@ abstract class GenericTypeParamResolver<T, I> implements ParameterResolver {
           errors.get(0));
     }
     throw new ParameterResolutionException(
-        String.format("Not found match constructor by %s(%d):\n%s", type.getSimpleName(), value));
+        String.format("Not found match constructor by %s:\n%s", type.getSimpleName(), value));
   }
 
   protected boolean excludeSuperClass(Class<?> clazz) {

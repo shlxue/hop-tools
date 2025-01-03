@@ -1,8 +1,8 @@
 package org.apache.hop.transforms.cdc;
 
-import com.opennews.hop.jdbc.Tab;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.util.StringUtil;
+import org.apache.hop.transforms.cdc.jdbc.Tab;
 
 import java.util.Collection;
 import java.util.function.Consumer;

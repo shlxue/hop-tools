@@ -33,6 +33,7 @@ public final class MixedVarPanelFactory<P extends Composite, C extends Control>
     return cache;
   }
 
+  @Override
   public MixedVarPanelFactory<P, C> tooltip(String tooltipText) {
     addProperty(c -> get().setToolTipText(tooltipText));
     return cast(this);

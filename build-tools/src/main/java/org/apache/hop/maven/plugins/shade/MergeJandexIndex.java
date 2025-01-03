@@ -8,10 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.*;
 import java.util.jar.JarOutputStream;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
-import java.util.*;
 
 public class MergeJandexIndex extends AppendingTransformer {
 
@@ -39,7 +39,7 @@ public class MergeJandexIndex extends AppendingTransformer {
         this.time = time;
       }
     } catch (Exception e) {
-      log.error("Read jandex index file " + resource, e);
+      log.error("Read jandex index file {}", resource, e);
     }
   }
 
@@ -97,9 +97,12 @@ public class MergeJandexIndex extends AppendingTransformer {
       }
     }
     log.info(
-        String.format(
-            "Merge jandex index from %d jars, index info: %d, %d, %d, %d",
-            count, aTimes.size(), sTimes.size(), iTimes.size(), cTimes.size()));
+        "Merge jandex index from {} jars, index info: {}, {}, {}, {}",
+        count,
+        aTimes.size(),
+        sTimes.size(),
+        iTimes.size(),
+        cTimes.size());
     return Index.create(annotations, subclasses, implementors, classes);
   }
 }

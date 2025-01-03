@@ -207,6 +207,7 @@ public final class Adapter {
 
   public static ShellListener shellDeiconified(Consumer<ShellEvent> c) {
     return new ShellAdapter() {
+      @SuppressWarnings("java:S1161")
       public void shellDeiconified(ShellEvent e) {
         c.accept(e);
       }
@@ -215,6 +216,7 @@ public final class Adapter {
 
   public static ShellListener shellIconified(Consumer<ShellEvent> c) {
     return new ShellAdapter() {
+      @SuppressWarnings("java:S1161")
       public void shellIconified(ShellEvent e) {
         c.accept(e);
       }

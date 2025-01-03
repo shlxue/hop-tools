@@ -1,11 +1,15 @@
 package org.apache.hop.testing.junit;
 
+import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.engine.IPipelineEngine;
 import org.apache.hop.pipeline.transform.ITransform;
 import org.apache.hop.pipeline.transform.ITransformMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
+import org.apache.hop.pipeline.transforms.rowgenerator.GeneratorField;
+import org.apache.hop.pipeline.transforms.rowgenerator.RowGeneratorMeta;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.action.ActionMeta;
 import org.apache.hop.workflow.action.IAction;
@@ -13,6 +17,8 @@ import org.apache.hop.workflow.actions.missing.MissingAction;
 import org.apache.hop.workflow.engine.IWorkflowEngine;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 final class MetaDelegate {
   private final IHopMetadataProvider metadataProvider;
@@ -41,7 +47,10 @@ final class MetaDelegate {
     waitUntilLoaded.run();
     PipelineMeta pipelineMeta = new PipelineMeta();
     pipelineMeta.setMetadataProvider(metadataProvider);
+    pipelineMeta.addTransform(mockRowGenerator());
     pipelineMeta.addTransform(new TransformMeta(transformName, transformMeta));
+    pipelineMeta.addPipelineHop(
+        new PipelineHopMeta(pipelineMeta.getTransform(0), pipelineMeta.getTransform(1)));
     pipelineMeta.setName(transformMeta.getClass().getSimpleName() + "-pipeline");
     return pipelineMeta;
   }
@@ -94,5 +103,20 @@ final class MetaDelegate {
       }
     }
     return type.getConstructor().newInstance();
+  }
+
+  private TransformMeta mockRowGenerator() {
+    RowGeneratorMeta rowGeneratorMeta = new RowGeneratorMeta();
+    rowGeneratorMeta.setDefault();
+    List<GeneratorField> fields = new ArrayList<>();
+    for (int i = 0; i < 9; i++) {
+      GeneratorField field = new GeneratorField();
+      int type = i + 1;
+      field.setName("f" + type);
+      field.setType(IValueMeta.getTypeDescription(type));
+      fields.add(field);
+    }
+    rowGeneratorMeta.setFields(fields);
+    return new TransformMeta("mockRowGenerator", rowGeneratorMeta);
   }
 }

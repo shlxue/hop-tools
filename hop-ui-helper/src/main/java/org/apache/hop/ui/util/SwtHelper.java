@@ -1,5 +1,8 @@
 package org.apache.hop.ui.util;
 
+import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.ui.core.widget.ComboVar;
+import org.apache.hop.ui.core.widget.TextVar;
 import org.eclipse.swt.widgets.*;
 
 import java.util.ArrayList;
@@ -47,6 +50,7 @@ public final class SwtHelper {
   }
 
   ///  mixed
+  ///
   public static <T extends Control, W extends Text> void bind(Type type, Button wButton, W target) {
     bind(type, wButton, target, target::getText);
   }
@@ -54,6 +58,28 @@ public final class SwtHelper {
   public static <W extends Text> void bind(
       Type type, Button wButton, W target, Supplier<String> getter) {
     bind(type, wButton, target, getter, target::setText);
+  }
+
+  public static <T extends Control, W extends Control> void bind(
+      Type type, Button wButton, W target, IVariables variables) {
+    Supplier<String> getter;
+    Consumer<String> setter;
+    if (target instanceof Text wText && target.getParent() instanceof TextVar) {
+      getter = wText::getText;
+      setter = wText::setText;
+    } else if (target instanceof Combo wCombo && target.getParent() instanceof ComboVar) {
+      getter = wCombo::getText;
+      setter = wCombo::setText;
+    } else if (target instanceof TextVar wTextVar) {
+      getter = wTextVar::getText;
+      setter = wTextVar::setText;
+    } else if (target instanceof ComboVar wComboVar) {
+      getter = wComboVar::getText;
+      setter = wComboVar::setText;
+    } else {
+      throw new IllegalArgumentException("Unsupported target type: " + target.getClass().getName());
+    }
+    bind(type, wButton, target, () -> variables.resolve(getter.get()), setter);
   }
 
   public static <T extends Control, W extends Widget> void bind(

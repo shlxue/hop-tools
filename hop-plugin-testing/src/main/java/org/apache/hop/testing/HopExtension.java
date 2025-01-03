@@ -104,13 +104,13 @@ public final class HopExtension
   private Optional<TestTemplateInvocationContextProvider> matchTestTemplate(Method testMethod) {
     if (testMethod.getParameterCount() == 1) {
       Class<?> parameterType = testMethod.getParameterTypes()[0];
-      if (HopHelper.isPluginUi(parameterType)) {
+      if (HopUiHelper.isPluginUi(parameterType)) {
         return Optional.of(pluginUiDelegate);
       }
-      if (HopHelper.isEngine(parameterType)) {
+      if (HopUiHelper.isEngine(parameterType)) {
         return Optional.of(engineDelegate);
       }
-      if (HopHelper.isPlugin(parameterType)) {
+      if (HopUiHelper.isPlugin(parameterType)) {
         return Optional.of(pluginDelegate);
       }
     }

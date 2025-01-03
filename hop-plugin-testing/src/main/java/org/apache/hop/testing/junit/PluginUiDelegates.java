@@ -16,7 +16,7 @@ final class PluginUiDelegates {
 
   public PluginUiDelegates(HopJunit hopJunit, MetaDelegate metaDelegate) {
     this.metaDelegate = metaDelegate;
-    this.parent = hopJunit.getShell();
+    this.parent = hopJunit.getSwtContext().getShell();
     this.variables = hopJunit.getVariables();
     this.log = hopJunit.getLog();
   }

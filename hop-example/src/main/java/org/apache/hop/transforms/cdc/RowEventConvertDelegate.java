@@ -1,9 +1,5 @@
 package org.apache.hop.transforms.cdc;
 
-import com.opennews.domain.FinishType;
-import com.opennews.domain.Op;
-import com.opennews.domain.OpLog;
-import com.opennews.domain.TransMessage;
 import org.apache.hop.core.IRowSet;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.exception.HopValueException;
@@ -14,9 +10,13 @@ import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.row.value.ValueMetaSerializable;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.transforms.cdc.domain.FinishType;
+import org.apache.hop.transforms.cdc.domain.Op;
+import org.apache.hop.transforms.cdc.domain.OpLog;
+import org.apache.hop.transforms.cdc.domain.TransMessage;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @SuppressWarnings("squid:S3740")
 class RowEventConvertDelegate extends BaseDelegate {

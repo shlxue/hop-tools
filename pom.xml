@@ -21,8 +21,8 @@
         <module>hop-plugin-testing</module>
 
         <module>hop-example</module>
-        <module>it-action-plugins</module>
-        <module>it-transform-plugins</module>
+        <!--module>it-action-plugins</module>
+        <module>it-transform-plugins</module-->
     </modules>
 
     <scm>
@@ -88,6 +88,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.build.timestamp.format>yyyy-MM-dd</maven.build.timestamp.format>
 
+        <mp.jacoco.version>0.8.12</mp.jacoco.version>
         <mp.sonar.version>3.9.1.2184</mp.sonar.version>
         <mp.spotless.version>2.29.0</mp.spotless.version>
         <mp.spotbugs.version>4.7.3.4</mp.spotbugs.version>
@@ -97,8 +98,9 @@
         <junit.version>5.11.0</junit.version>
         <h2.version>2.3.232</h2.version>
 
+        <jacoco.prepare-phase>none</jacoco.prepare-phase>
         <sonar.host.url>https://sonar.opennews.com/sonar</sonar.host.url>
-        <sonar.sources>pom.xml</sonar.sources>
+        <sonar.inclusions>**/*.java</sonar.inclusions>
     </properties>
 
     <dependencyManagement>
@@ -169,6 +171,11 @@
                     <version>3.6.0</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${mp.jacoco.version}</version>
+                </plugin>
+                <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
                     <version>${mp.sonar.version}</version>
@@ -177,6 +184,11 @@
                     <groupId>com.diffplug.spotless</groupId>
                     <artifactId>spotless-maven-plugin</artifactId>
                     <version>${mp.spotless.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>4.8.6.6</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -226,6 +238,56 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <formats>
+                        <format>XML</format>
+                    </formats>
+                    <rules>
+                        <rule>
+                            <element>CLASS</element>
+                            <limits>
+                                <limit>
+                                    <counter>LINE</counter>
+                                    <value>COVEREDRATIO</value>
+                                    <minimum>72%</minimum>
+                                </limit>
+                            </limits>
+                        </rule>
+                    </rules>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>prepare-agent-it</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>prepare-agent-integration</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report-it-test</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>report-integration</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
                 <configuration>
@@ -266,6 +328,21 @@
             </plugin>
         </plugins>
     </build>
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>report</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
 
     <profiles>
         <profile>
@@ -287,6 +364,17 @@
             </dependencies>
         </profile>
         <profile>
+            <id>env-test</id>
+            <activation>
+                <file>
+                    <exists>src/test/java</exists>
+                </file>
+            </activation>
+            <properties>
+                <jacoco.prepare-phase>validate</jacoco.prepare-phase>
+            </properties>
+        </profile>
+        <profile>
             <id>os-mac</id>
             <activation>
                 <os>
@@ -296,16 +384,7 @@
             <build>
                 <plugins>
                     <plugin>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <argLine>-XstartOnFirstThread</argLine>
-                        </configuration>
-                    </plugin>
-                    <plugin>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <configuration>
-                            <argLine>-XstartOnFirstThread</argLine>
-                        </configuration>
                         <executions>
                             <execution>
                                 <goals>

@@ -1,6 +1,5 @@
 package org.apache.hop.transforms.cdc;
 
-import com.opennews.hop.jdbc.Tab;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.CheckResult;
@@ -20,18 +19,19 @@ import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.pipeline.PipelineHopMeta;
 import org.apache.hop.pipeline.PipelineMeta;
+import org.apache.hop.pipeline.transform.*;
 import org.apache.hop.pipeline.transform.stream.IStream;
 import org.apache.hop.pipeline.transform.stream.IStream.StreamType;
 import org.apache.hop.pipeline.transform.stream.Stream;
 import org.apache.hop.pipeline.transform.stream.StreamIcon;
-import org.apache.hop.pipeline.transform.*;
+import org.apache.hop.transforms.cdc.jdbc.Tab;
 import org.w3c.dom.Node;
 
 import java.lang.reflect.Method;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.*;
 
 @Transform(
     id = "SubOpEvent",
@@ -259,7 +259,7 @@ public class SubOpEventMeta extends BaseTransformMeta<SubOpEvent, SubOpEventData
               ICheckResult.TYPE_RESULT_ERROR,
               i18n("MSG.Check.MissingPk", tab.getName()),
               stepMeta));
-    } else if (!tab.getPK().isPresent() || !tab.getPK().get().isUnique()) {
+    } else if (tab.getPK().isEmpty() || !tab.getPK().get().isUnique()) {
       remarks.add(
           new CheckResult(
               ICheckResult.TYPE_RESULT_WARNING, i18n("MSG.Check.Index", tab.getName()), stepMeta));

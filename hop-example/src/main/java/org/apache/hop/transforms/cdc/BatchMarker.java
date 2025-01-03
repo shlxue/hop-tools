@@ -1,13 +1,13 @@
 package org.apache.hop.transforms.cdc;
 
-import com.opennews.domain.MixedKey;
-import com.opennews.domain.RefKey;
 import lombok.Getter;
+import org.apache.hop.transforms.cdc.domain.MixedKey;
+import org.apache.hop.transforms.cdc.domain.RefKey;
 
 import java.io.PrintStream;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Function;
-import java.util.*;
 
 @Getter
 class BatchMarker {

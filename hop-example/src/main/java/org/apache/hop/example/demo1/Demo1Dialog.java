@@ -2,8 +2,6 @@ package org.apache.hop.example.demo1;
 
 import org.apache.hop.core.Const;
 import org.apache.hop.core.database.DatabaseMeta;
-import org.apache.hop.core.exception.HopTransformException;
-import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
@@ -13,6 +11,7 @@ import org.apache.hop.ui.core.widget.MetaSelectionLine;
 import org.apache.hop.ui.layout.LData;
 import org.apache.hop.ui.layout.Layouts;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
+import org.apache.hop.ui.util.AsyncFetch;
 import org.apache.hop.ui.util.SwtDialog;
 import org.apache.hop.ui.widgets.Widgets;
 import org.eclipse.swt.SWT;
@@ -22,10 +21,8 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.*;
 
-import java.util.Arrays;
-
 public class Demo1Dialog extends BaseTransformDialog {
-  private static Class<?> PKG = Demo1Meta.class;
+  private static final Class<?> PKG = Demo1Meta.class;
 
   private final MetaSelectionLine<DatabaseMeta> wConnection;
   private final Spinner wAge;
@@ -51,7 +48,7 @@ public class Demo1Dialog extends BaseTransformDialog {
     this.changed = this.input.hasChanged();
 
     super.shell =
-        Widgets.shell(SWT.SHELL_TRIM | SWT.BORDER)
+        Widgets.shell(SWT.DIALOG_TRIM | SWT.MAX | SWT.RESIZE)
             .text(BaseMessages.getString(PKG, "Demo1Dialog.DialogTitle"))
             .layout(Layouts.defaultForm())
             .create(parent);
@@ -83,7 +80,7 @@ public class Demo1Dialog extends BaseTransformDialog {
             .onModify(this::onChanged)
             .create(wGeneral);
     Widgets.label(SWT.RIGHT)
-        .text(BaseMessages.getString(PKG, "Demo1Dialog.Label.Name"))
+        .text(BaseMessages.getString(PKG, "Demo1Dialog.Label.Age"))
         .layoutData(LData.on(wAge))
         .create(wGeneral);
 
@@ -93,18 +90,18 @@ public class Demo1Dialog extends BaseTransformDialog {
             .onModify(this::onChanged)
             .create(wGeneral);
     Widgets.label(SWT.RIGHT)
-        .text(BaseMessages.getString(PKG, "Demo1Dialog.Label.Name"))
+        .text(BaseMessages.getString(PKG, "Demo1Dialog.Label.CustomType"))
         .layoutData(LData.on(wCustomType))
         .create(wGeneral);
 
     wContent =
         Widgets.text(SWT.SINGLE | SWT.TRAIL | SWT.BORDER)
             .layoutData(LData.byTop(wCustomType))
+            .message("Content text")
             .onModify(this::onChanged)
             .create(wGeneral);
-    wContent.setMessage("xxx");
     Widgets.label(SWT.RIGHT)
-        .text(BaseMessages.getString(PKG, "Demo1Dialog.Label.Name"))
+        .text(BaseMessages.getString(PKG, "Demo1Dialog.Label.Content"))
         .layoutData(LData.on(wContent))
         .create(wGeneral);
 
@@ -114,12 +111,12 @@ public class Demo1Dialog extends BaseTransformDialog {
             .onModify(this::onChanged)
             .create(wGeneral);
     Widgets.label(SWT.RIGHT)
-        .text(BaseMessages.getString(PKG, "Demo1Dialog.Label.Name"))
+        .text(BaseMessages.getString(PKG, "Demo1Dialog.Label.Type"))
         .layoutData(LData.on(wType))
         .create(wGeneral);
 
     setShellImage(shell, this.input);
-    wTabFolder.setLayoutData(LData.fill(wConnection, shell, 120, false));
+    wTabFolder.setLayoutData(LData.fill(wConnection, shell, -1, false));
     wOk =
         Widgets.button(SWT.PUSH)
             .text(BaseMessages.getString("System.Button.OK"))
@@ -138,52 +135,38 @@ public class Demo1Dialog extends BaseTransformDialog {
   @Override
   public String open() {
     PropsUi.setLook(shell);
+    shell.layout(true, true);
 
-    shell.getDisplay().asyncExec(this::lazyFillFields);
     getData();
     input.setChanged(changed);
+    AsyncFetch.of(shell.getDisplay())
+        .prevTransformFieldNames(variables, pipelineMeta, transformName, this::onRefreshFields);
 
     SwtDialog.defaultShellHanding(shell, this::ok, this::cancel);
     return transformName;
   }
 
-  private void lazyFillFields() {
-    try {
-      IRowMeta rowMeta = pipelineMeta.getPrevTransformFields(variables, transformMeta);
-      if (rowMeta != null) {
-        String[] fieldNames = rowMeta.getFieldNames();
-        Arrays.sort(fieldNames);
-        if (!shell.isDisposed() && fieldNames.length > 0) {
-          shell.getDisplay().asyncExec(() -> onRefreshFields(fieldNames));
-        } else {
-          shell.getDisplay().asyncExec(() -> onRefreshFields("f7 f9 f4".split(" ")));
-        }
-      } else {
-        if (!shell.isDisposed()) {
-          shell.getDisplay().asyncExec(() -> onRefreshFields("f1 f3 f4".split(" ")));
-        }
-      }
-    } catch (HopTransformException e) {
-    }
-  }
-
-  private void onRefreshFields(String[] fieldNames) {
-    //    wType.setItems(fieldNames);
+  void onRefreshFields(String[] fieldNames) {
+    wType.setItems(fieldNames);
   }
 
   private void getData() {
-    wTransformName.setText(Const.nullToEmpty(transformName));
-    //    wConnection.setText(Const.nullToEmpty(input.getConnection()));
-    //    wAge.setSelection(input.getAge());
+    wConnection.setText(Const.nullToEmpty(input.getConnection()));
+    wAge.setSelection(input.getAge());
+    wContent.setText(Const.nullToEmpty(input.getContent()));
+    wType.select(input.getType());
+    wCustomType.select(input.getCustomType());
   }
 
   private void ok(SelectionEvent event) {
     if (Utils.isEmpty(wTransformName.getText())) {
       return;
     }
-
-    //    input.setConnection(wConnection.getText());
-    //    input.setAge(wAge.getSelection());
+    input.setConnection(wConnection.getText());
+    input.setAge(wAge.getSelection());
+    input.setContent(wContent.getText());
+    input.setType(wType.getSelectionIndex());
+    input.setCustomType(wCustomType.getSelectionIndex());
     this.transformName = wTransformName.getText();
     this.dispose();
   }
@@ -194,7 +177,7 @@ public class Demo1Dialog extends BaseTransformDialog {
     dispose();
   }
 
-  private <T> void onChanged(T event) {
+  <T> void onChanged(T event) {
     input.setChanged();
   }
 }

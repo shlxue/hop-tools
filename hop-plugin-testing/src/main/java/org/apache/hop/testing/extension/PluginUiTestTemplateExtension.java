@@ -2,21 +2,16 @@ package org.apache.hop.testing.extension;
 
 import org.apache.hop.testing.HopEnv;
 import org.apache.hop.testing.SpecMode;
-import org.apache.hop.testing.junit.HopHelper;
 import org.apache.hop.testing.junit.HopJunit;
+import org.apache.hop.testing.junit.HopUiHelper;
 import org.apache.hop.testing.junit.StatusUtil;
 import org.apache.hop.testing.junit.StoreKey;
-import org.apache.hop.testing.junit.SwtContext;
 import org.apache.hop.testing.params.ParameterResolvers;
 import org.apache.hop.testing.ui.UiSpecs;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.jupiter.api.TestTemplate;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.InvocationInterceptor;
-import org.junit.jupiter.api.extension.ParameterResolver;
-import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
-import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
+import org.junit.jupiter.api.extension.*;
 import org.junit.platform.commons.util.AnnotationUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ReflectionUtils;
@@ -35,7 +30,7 @@ class PluginUiTestTemplateExtension implements TestTemplateInvocationContextProv
     Method testMethod = context.getRequiredTestMethod();
     if (testMethod.getParameterCount() == 1) {
       Class<?> paramType = testMethod.getParameterTypes()[0];
-      if (HopHelper.isPluginUi(paramType)) {
+      if (HopUiHelper.isPluginUi(paramType)) {
         Preconditions.condition(
             AnnotationUtils.isAnnotated(testMethod, TestTemplate.class),
             () -> "Not found @TestTemplate annotation on test method " + testMethod.getName());
@@ -58,7 +53,8 @@ class PluginUiTestTemplateExtension implements TestTemplateInvocationContextProv
     ParameterResolver rawParamResolver = pluginUiParamResolver(paramType);
     SpecMode specMode = StatusUtil.uiSpec(hopEnv);
     StatusUtil.set(context, StoreKey.HOP_JUNIT_SPEC, specMode);
-    UiSpecs<Dialog> specs = UiSpecs.builder(newShell(context), (Class<Dialog>) paramType);
+    Shell shell = hopJunit.getSwtContext().getShell();
+    UiSpecs<Dialog> specs = UiSpecs.builder(newShell(context, shell), (Class<Dialog>) paramType);
     return Stream.of(templateContexts(specMode, specs, rawParamResolver));
   }
 
@@ -66,7 +62,7 @@ class PluginUiTestTemplateExtension implements TestTemplateInvocationContextProv
       SpecMode specMode, UiSpecs<?> uiSpecs, ParameterResolver root) {
     List<TestTemplateInvocationContext> contexts = new ArrayList<>();
 
-    contexts.add(newContext("originTestMethod", root));
+    contexts.add(newContext("originTestMethod", root, uiSpecs.build()));
     if (specMode.isTest()) {
       contexts.add(newContext("assertDialog: initInConstructor", root, uiSpecs.buildUi().build()));
       contexts.add(newContext("assertShell: preferredSize", root, uiSpecs.minimum().build()));
@@ -90,6 +86,8 @@ class PluginUiTestTemplateExtension implements TestTemplateInvocationContextProv
       contexts.add(
           newContext("assertListener: switchFocus", root, uiSpecs.tags().switchFocus().build()));
       if (specMode.isStaticEvent()) {
+        contexts.add(
+            newContext("assertListener: cancel", root, uiSpecs.cancelListener().build(true, true)));
         contexts.add(newContext("assertListener: ok", root, uiSpecs.okListener().build()));
       }
       if (specMode.isDynamicEvent()) {
@@ -106,7 +104,7 @@ class PluginUiTestTemplateExtension implements TestTemplateInvocationContextProv
   }
 
   private ParameterResolver pluginUiParamResolver(Class<?> paramType) {
-    return HopHelper.isActionUi(paramType)
+    return HopUiHelper.isActionUi(paramType)
         ? ParameterResolvers.actionUi()
         : ParameterResolvers.transformUi();
   }
@@ -134,8 +132,7 @@ class PluginUiTestTemplateExtension implements TestTemplateInvocationContextProv
         .toArray(Class[]::new);
   }
 
-  private Shell newShell(ExtensionContext context) {
-    return StatusUtil.get(
-        context, StoreKey.HOP_SWT_NEW_SHELL, Shell.class, k -> SwtContext.getInstance().newShell());
+  private Shell newShell(ExtensionContext context, Shell defaultShell) {
+    return StatusUtil.get(context, StoreKey.HOP_SWT_NEW_SHELL, Shell.class, k -> defaultShell);
   }
 }

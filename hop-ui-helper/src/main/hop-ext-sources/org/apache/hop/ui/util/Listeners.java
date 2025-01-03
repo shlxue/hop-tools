@@ -57,21 +57,16 @@ public final class Listeners {
       builder.basePath(basePath);
     }
     HopHelper.directoryDialog(widget.getShell(), builder.build())
-        .ifPresent(
-            path -> {
-              Data.setValue(widget, path);
-              //          SwtNotify.notify(Data.editor(widget, Control.class), SWT.Modify);
-            });
-    // BaseDialog.presentFileDialog(widget.getShell(), fileExtensions, fileNames, false);
+        .ifPresent(path -> Data.setValue(widget, path));
   }
 
   public static void onSelectedFile(SelectionEvent event) {
     Control widget = Control.class.cast(event.widget);
     String[] fileExtensions = new String[] {"*"};
     String[] fileNames = new String[] {"*"};
+    //    IVariables variables = ;
     HopHelper.fileDialog(widget.getShell(), VfsConfig.of("sel").build())
         .ifPresent(path -> Data.setValue(widget, path));
-    // BaseDialog.presentFileDialog(false, widget.getShell(), fileExtensions, fileNames, false);
   }
 
   private static <T> T get(Widget widget, String key, Class<T> clazz) {
@@ -111,6 +106,9 @@ public final class Listeners {
     ILoggingObject logObject = get(widget, Data.UI_HOP_LOG, ILoggingObject.class);
     CCombo wConnect = get(widget, Data.UI_JDBC_CONNECTION, CCombo.class);
     String schema = Data.getGetter(widget, String.class, Data.UI_EDITOR_GETTER);
+    if (StringUtil.isEmpty(wConnect.getText())) {
+      return;
+    }
     Shell shell = widget.getDisplay().getActiveShell();
     JdbcHelper.of(logObject, var, pipelineMeta.findDatabase(wConnect.getText(), var))
         .query(
@@ -143,6 +141,9 @@ public final class Listeners {
     CCombo wConnect = get(event.widget, Data.UI_JDBC_CONNECTION, CCombo.class);
     String schema = Data.get(event.widget, Text.class, Data.UI_JDBC_SCHEMA).getText();
     String table = Data.getGetter(event.widget, String.class, Data.UI_EDITOR_GETTER);
+    if (StringUtil.isEmpty(wConnect.getText())) {
+      return;
+    }
     Shell shell = widget.getDisplay().getActiveShell();
     JdbcHelper.of(logObject, var, pipelineMeta.findDatabase(wConnect.getText(), var))
         .query(
@@ -164,24 +165,22 @@ public final class Listeners {
     void call();
   }
 
-
-
   public static void bindSchemaSelector(
-    IVariables variables,
-    Supplier<DatabaseMeta> databaseGetter,
-    TextVar textVar,
-    Widget wSelectButton) {
+      IVariables variables,
+      Supplier<DatabaseMeta> databaseGetter,
+      TextVar textVar,
+      Widget wSelectButton) {
     wSelectButton.setData(HOP_KEY_VARIABLES, variables);
     wSelectButton.setData(HOP_GETTER_KEY_DATABASE_META, databaseGetter);
     wSelectButton.setData(WIDGET_KEY_SCHEMA, textVar);
   }
 
   public static void bindTableSelector(
-    IVariables variables,
-    Supplier<DatabaseMeta> databaseGetter,
-    Supplier<String> schemaGetter,
-    TextVar textVar,
-    Widget wSelectButton) {
+      IVariables variables,
+      Supplier<DatabaseMeta> databaseGetter,
+      Supplier<String> schemaGetter,
+      TextVar textVar,
+      Widget wSelectButton) {
     wSelectButton.setData(HOP_KEY_VARIABLES, variables);
     wSelectButton.setData(HOP_GETTER_KEY_DATABASE_META, databaseGetter);
     wSelectButton.setData(WIDGET_KEY_SCHEMA, schemaGetter);
@@ -189,11 +188,11 @@ public final class Listeners {
   }
 
   public static void bindSchemaSelector(
-    IVariables variables,
-    PipelineMeta pipelineMeta,
-    Supplier<String> connectGetter,
-    TextVar textVar,
-    Widget wSelectButton) {
+      IVariables variables,
+      PipelineMeta pipelineMeta,
+      Supplier<String> connectGetter,
+      TextVar textVar,
+      Widget wSelectButton) {
     wSelectButton.setData(HOP_KEY_VARIABLES, variables);
     wSelectButton.setData(HOP_KEY_PIPELINE_META, pipelineMeta);
     wSelectButton.setData(WIDGET_KEY_CONNECTION, connectGetter);

@@ -108,6 +108,7 @@
                     <systemPropertyVariables>
                         <org.slf4j.simpleLogger.defaultLogLevel>TRACE</org.slf4j.simpleLogger.defaultLogLevel>
                     </systemPropertyVariables>
+                    <!--                    <argLine>-XstartOnFirstThread @{argLine}</argLine>-->
                 </configuration>
             </plugin>
             <!--            <plugin>-->

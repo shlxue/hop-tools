@@ -1,12 +1,12 @@
-package com.opennews.hop.jdbc;
+package org.apache.hop.transforms.cdc.jdbc;
 
 import org.apache.hop.core.util.StringUtil;
 
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.*;
 
 public class Tab<V extends Cloneable> implements Cloneable {
   private final Function<V, String> nameGetter;

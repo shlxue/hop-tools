@@ -1,9 +1,5 @@
 package org.apache.hop.transforms.cdc;
 
-import com.opennews.domain.MixedKey;
-import com.opennews.domain.Op;
-import com.opennews.domain.OpLog;
-import com.opennews.domain.RefKey;
 import org.apache.hop.core.IRowSet;
 import org.apache.hop.core.database.Database;
 import org.apache.hop.core.database.DatabaseMeta;
@@ -22,16 +18,20 @@ import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.BaseTransform;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transform.stream.IStream;
+import org.apache.hop.transforms.cdc.domain.MixedKey;
+import org.apache.hop.transforms.cdc.domain.Op;
+import org.apache.hop.transforms.cdc.domain.OpLog;
+import org.apache.hop.transforms.cdc.domain.RefKey;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.*;
 
 import static org.apache.hop.transforms.cdc.SubOpEventMeta.i18n;
 
