@@ -50,11 +50,17 @@ public final class VfsConfig {
   }
 
   public Optional<Combo> tryGetCombo() {
-    return Optional.ofNullable(editor instanceof Combo ? (Combo) editor : null);
+    if (editor instanceof Combo combo) {
+      return Optional.of(combo);
+    }
+    return Optional.empty();
   }
 
   public Optional<Text> tryGetText() {
-    return Optional.ofNullable(editor instanceof Text ? (Text) editor : null);
+    if (editor instanceof Text text) {
+      return Optional.ofNullable(text);
+    }
+    return Optional.empty();
   }
 
   public Optional<TextVar> tryGetTextVar() {

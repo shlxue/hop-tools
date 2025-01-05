@@ -34,12 +34,11 @@ public final class HopExtension
     this.engineDelegate = TestTemplates.engineProvider();
     this.pluginDelegate = TestTemplates.pluginProvider();
     this.pluginUiDelegate = TestTemplates.pluginUiProvider();
-    logger.trace("HopExtension created");
   }
 
   @Override
   public void beforeAll(ExtensionContext context) {
-    logger.trace("HopExtension before all");
+    logger.trace("before all");
     Class<?> testClass = context.getRequiredTestClass();
     HopEnv hopEnv = testClass.getAnnotation(HopEnv.class);
 
@@ -65,7 +64,7 @@ public final class HopExtension
 
   @Override
   public void afterAll(ExtensionContext context) {
-    logger.trace("HopExtension after all");
+    logger.trace("after all");
     StatusUtil.remove(context, StoreKey.HOP_JUNIT, HopJunit.class).close();
     if (h2Extension != null) {
       h2Extension.afterAll(context);
@@ -81,9 +80,11 @@ public final class HopExtension
     Optional<TestTemplateInvocationContextProvider> optional =
         matchTestTemplate(context.getRequiredTestMethod());
     if (optional.isPresent() && optional.get().supportsTestTemplate(context)) {
+      logger.trace("supports test template");
       return true;
     }
     if (swtExtension != null && swtExtension.supportsTestTemplate(context)) {
+      logger.trace("SwtExtension supports test template");
       StatusUtil.set(context, "hop.swtExtension", true);
       return true;
     }

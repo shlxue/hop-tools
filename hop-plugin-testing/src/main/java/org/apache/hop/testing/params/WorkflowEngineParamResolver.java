@@ -1,6 +1,5 @@
 package org.apache.hop.testing.params;
 
-import org.apache.hop.core.parameters.INamedParameters;
 import org.apache.hop.workflow.WorkflowMeta;
 import org.apache.hop.workflow.engine.IWorkflowEngine;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -8,11 +7,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import java.lang.reflect.Constructor;
 
 class WorkflowEngineParamResolver
-    extends GenericTypeParamResolver<IWorkflowEngine<WorkflowMeta>, INamedParameters> {
-
-  WorkflowEngineParamResolver() {
-    super(true);
-  }
+    extends BaseEngineParam<IWorkflowEngine<WorkflowMeta>, WorkflowMeta> {
 
   @Override
   protected boolean matchConstructor(Constructor<?> constructor) {

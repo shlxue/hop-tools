@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
 import org.junit.platform.commons.util.AnnotationUtils;
 import org.junit.platform.commons.util.Preconditions;
+import org.slf4j.Logger;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -24,6 +25,11 @@ import java.util.List;
 import java.util.stream.Stream;
 
 class SwtTestTemplateExtension implements TestTemplateInvocationContextProvider {
+  private final Logger log;
+
+  SwtTestTemplateExtension(Logger log) {
+    this.log = log;
+  }
 
   @Override
   public boolean supportsTestTemplate(ExtensionContext context) {
@@ -44,6 +50,7 @@ class SwtTestTemplateExtension implements TestTemplateInvocationContextProvider 
   @Override
   public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(
       ExtensionContext context) {
+    log.debug("Initializing test template for swt");
     Class<?> paramType = context.getRequiredTestMethod().getParameterTypes()[0];
     ParameterResolver rawParamResolver = swtParamResolver(paramType);
     SpecMode specMode =

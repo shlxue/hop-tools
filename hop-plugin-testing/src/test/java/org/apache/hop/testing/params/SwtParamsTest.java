@@ -27,7 +27,6 @@ class SwtParamsTest {
             .create(parent);
     Widgets.C.tabItem(SWT.NONE).text("ti1").create(tabFolder);
     Widgets.C.tabItem(SWT.NONE).text("ti2").create(tabFolder);
-    //    SwtDialog.defaultShellHanding(parent.getShell());
   }
 
   @TestTemplate

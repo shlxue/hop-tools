@@ -290,7 +290,8 @@ public final class HopJunit implements AutoCloseable, IHasHopMetadataProvider {
   private void initHopLogStore() {
     if (!HopLogStore.isInitialized()) {
       log.logDebug("Initializing Hop Log Store");
-      HopLogStore.init(false, true);
+      HopLogStore.init();
+      HopLogStore.getAppender().addLoggingEventListener(new HopMvnLogger());
     }
   }
 }

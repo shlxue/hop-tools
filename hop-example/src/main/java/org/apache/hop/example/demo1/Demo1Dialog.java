@@ -174,7 +174,7 @@ public class Demo1Dialog extends BaseTransformDialog {
   private void cancel(SelectionEvent event) {
     transformName = null;
     input.setChanged(changed);
-    dispose();
+    shell.dispose();
   }
 
   <T> void onChanged(T event) {

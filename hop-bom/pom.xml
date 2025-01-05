@@ -72,6 +72,11 @@
                 <artifactId>hop-engine-beam</artifactId>
                 <version>${hop.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.hop</groupId>
+                <artifactId>hop-engines-beam</artifactId>
+                <version>${hop.version}</version>
+            </dependency>
 
             <!-- action plugins -->
             <dependency>

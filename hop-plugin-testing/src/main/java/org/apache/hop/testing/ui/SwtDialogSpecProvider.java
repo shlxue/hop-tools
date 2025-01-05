@@ -99,8 +99,6 @@ class SwtDialogSpecProvider<T extends Dialog> extends AbstractSpecProvider<T, Sp
   @Override
   public void invoke(T target, SpecMode mode, Shell dispatcher) {
     super.invoke(target, mode, dispatcher);
-    Shell[] shells = dispatcher.getDisplay().getShells();
-    System.out.println(shells.length);
     if (usingOpenMode
         || HopUiHelper.isPluginUi(target.getClass()) && !isConstructorBuilder(dispatcher)) {
       legacyShellHanding(target, mode.isColorized());

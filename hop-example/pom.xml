@@ -103,24 +103,6 @@
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <systemPropertyVariables>
-                        <org.slf4j.simpleLogger.defaultLogLevel>TRACE</org.slf4j.simpleLogger.defaultLogLevel>
-                    </systemPropertyVariables>
-                    <!--                    <argLine>-XstartOnFirstThread @{argLine}</argLine>-->
-                </configuration>
-            </plugin>
-            <!--            <plugin>-->
-            <!--                <artifactId>maven-failsafe-plugin</artifactId>-->
-            <!--                <configuration>-->
-            <!--                    <useSystemClassLoader>true</useSystemClassLoader>-->
-            <!--                    <systemPropertyVariables>-->
-            <!--                        <org.slf4j.simpleLogger.defaultLogLevel>TRACE</org.slf4j.simpleLogger.defaultLogLevel>-->
-            <!--                    </systemPropertyVariables>-->
-            <!--                </configuration>-->
-            <!--            </plugin>-->
-            <plugin>
                 <groupId>org.eclipse.jetty.ee10</groupId>
                 <artifactId>jetty-ee10-maven-plugin</artifactId>
                 <version>12.0.15</version>

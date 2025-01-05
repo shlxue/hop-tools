@@ -1,10 +1,8 @@
 package org.apache.hop.testing.extension;
 
-import org.junit.jupiter.api.extension.ExecutionCondition;
-import org.junit.jupiter.api.extension.Extension;
-import org.junit.jupiter.api.extension.InvocationInterceptor;
-import org.junit.jupiter.api.extension.ParameterResolver;
-import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
+import org.junit.jupiter.api.extension.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -13,6 +11,7 @@ import java.util.Set;
 
 class TemplateContext implements TestTemplateInvocationContext {
   private static final String FORMATTER = "[%s] %x. %s";
+  protected static final Logger log = LoggerFactory.getLogger(TemplateContext.class);
   private final String category;
   private final String displayName;
   protected final Set<Extension> extensions;

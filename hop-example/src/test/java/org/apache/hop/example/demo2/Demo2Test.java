@@ -5,6 +5,7 @@ import org.apache.hop.pipeline.engine.IEngineComponent;
 import org.apache.hop.pipeline.transform.ITransform;
 import org.apache.hop.testing.HopAssert;
 import org.apache.hop.testing.HopExtension;
+import org.apache.hop.testing.params.provider.HopFileSource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,12 +18,14 @@ class Demo2Test {
     Assertions.assertNotNull(dialog);
   }
 
-  //  @TestTemplate
+  @TestTemplate
+  @HopFileSource
   void testDemo2Default(Result result) {
     Assertions.assertNotNull(result);
   }
 
-  //  @TestTemplate
+  @TestTemplate
+  @HopFileSource
   void testDemo2(Result result, ITransform transform, IEngineComponent component) {
     HopAssert.assertResult(result, 1, true);
   }

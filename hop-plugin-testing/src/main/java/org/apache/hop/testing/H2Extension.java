@@ -94,7 +94,8 @@ final class H2Extension implements BeforeAllCallback, AfterAllCallback {
 
   private void runScript(Connection conn, String sql) throws SQLException {
     String prefix = sql.substring(0, Math.min(sql.length(), 32)).replace('\n', ' ');
-    logger.trace("Preparing sql script({}): {}...", sql.length(), prefix);
+    logger.trace(
+        "Preparing sql script({}): {}...", sql.length(), prefix.replaceAll("\\s{2,}", " "));
     String shortSql = sql.replaceAll("\\s+", " ");
     try (PreparedStatement ps = conn.prepareStatement(shortSql)) {
       ps.executeUpdate();

@@ -13,6 +13,18 @@ public final class ParameterResolvers {
     return new DialogParamResolver();
   }
 
+  public static ParameterResolver action() {
+    return new ActionParamResolver();
+  }
+
+  public static ParameterResolver transformMeta() {
+    return new TransformParamResolver();
+  }
+
+  public static ParameterResolver transform() {
+    return new TransformParamResolver();
+  }
+
   public static ParameterResolver actionUi() {
     return new ActionUiParamResolver();
   }

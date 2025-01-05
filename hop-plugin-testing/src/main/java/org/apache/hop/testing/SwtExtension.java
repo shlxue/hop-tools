@@ -26,14 +26,13 @@ public final class SwtExtension
   private final TestTemplateInvocationContextProvider delegate;
 
   public SwtExtension() {
-    logger.trace("SwtExtension created");
     this.swtContext = SwtContext.getInstance();
     this.delegate = TestTemplates.swtUiProvider();
   }
 
   @Override
   public void beforeAll(ExtensionContext context) {
-    logger.trace("SwtExtension before all");
+    logger.trace("before all");
     if (supportUi(context.getRequiredTestClass())) {
       StatusUtil.set(context, StoreKey.HOP_SWT_CONTEXT, swtContext);
       Shell shell = swtContext.getShell();
@@ -45,7 +44,7 @@ public final class SwtExtension
 
   @Override
   public void afterAll(ExtensionContext context) {
-    logger.trace("SwtExtension after all");
+    logger.trace("after all");
     StatusUtil.remove(context, StoreKey.HOP_SWT_CONTEXT);
     StatusUtil.remove(context, StoreKey.HOP_SWT_SHELL);
     logger.trace("Clean junit store for swt");

@@ -96,6 +96,8 @@ class HopJunitConfig extends ConfigFile {
 
   private void applySystemProperties() {
     System.setProperty(Const.HOP_DISABLE_CONSOLE_LOGGING, "Y");
+    System.setProperty(Const.HOP_REDIRECT_STDERR, "N");
+    System.setProperty(Const.HOP_REDIRECT_STDOUT, "N");
     System.setProperty("HOP_CONFIG_FOLDER", testClassPath + "/config");
     System.setProperty("HOP_AUDIT_FOLDER", testClassPath + "/audit");
     System.setProperty("HOP_USE_NATIVE_FILE_DIALOG", "true");

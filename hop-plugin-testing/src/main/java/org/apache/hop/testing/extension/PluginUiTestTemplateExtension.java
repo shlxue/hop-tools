@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.*;
 import org.junit.platform.commons.util.AnnotationUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ReflectionUtils;
+import org.slf4j.Logger;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -24,6 +25,11 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 class PluginUiTestTemplateExtension implements TestTemplateInvocationContextProvider {
+  private final Logger log;
+
+  PluginUiTestTemplateExtension(Logger log) {
+    this.log = log;
+  }
 
   @Override
   public boolean supportsTestTemplate(ExtensionContext context) {
@@ -47,6 +53,7 @@ class PluginUiTestTemplateExtension implements TestTemplateInvocationContextProv
   @SuppressWarnings("unchecked")
   public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(
       ExtensionContext context) {
+    log.debug("Initializing test template for hop plugin ui");
     HopEnv hopEnv = context.getRequiredTestClass().getAnnotation(HopEnv.class);
     HopJunit hopJunit = StatusUtil.get(context, StoreKey.HOP_JUNIT, HopJunit.class);
     Class<?> paramType = context.getRequiredTestMethod().getParameterTypes()[0];

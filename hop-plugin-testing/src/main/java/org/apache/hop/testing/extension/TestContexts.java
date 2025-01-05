@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
 
 public class TestContexts {
+
   private static final ExecutionCondition[] UI_CONDITION_EXTENSIONS =
       new ExecutionCondition[] {new EnableOnX11Condition(), new EnableSwtEnvironment()};
 

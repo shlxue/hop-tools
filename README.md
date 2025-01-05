@@ -47,7 +47,13 @@ On linux or macOS: `make all`
     * it-action-plugins
     * it-transform-plugins
 
+
 ## Features
+
+##### param type
+
+* INameParam
+* ITransformDialog
 
 1. [x] H2Extension: embedded h2 database(tcp server)
 2. [x] SwtExtension: swt & rwt support

@@ -1,6 +1,5 @@
 package org.apache.hop.testing.params;
 
-import org.apache.hop.core.parameters.INamedParameters;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.engine.IPipelineEngine;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -8,11 +7,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import java.lang.reflect.Constructor;
 
 class PipelineEngineParamResolver
-    extends GenericTypeParamResolver<IPipelineEngine<PipelineMeta>, INamedParameters> {
-
-  PipelineEngineParamResolver() {
-    super(true);
-  }
+    extends BaseEngineParam<IPipelineEngine<PipelineMeta>, PipelineMeta> {
 
   @Override
   protected boolean matchConstructor(Constructor<?> constructor) {

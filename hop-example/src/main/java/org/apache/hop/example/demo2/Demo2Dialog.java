@@ -82,7 +82,7 @@ public class Demo2Dialog extends ActionDialog {
   private void cancel(SelectionEvent event) {
     action.setChanged(changed);
     action.setName(null);
-    dispose();
+    shell.dispose();
   }
 
   <T> void onChanged(T event) {
