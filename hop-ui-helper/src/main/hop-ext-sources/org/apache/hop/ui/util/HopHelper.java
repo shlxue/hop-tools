@@ -46,7 +46,7 @@ public class HopHelper {
 
   static Optional<String> directoryDialog(Shell shell, VfsConfig cfg) {
     IVariables variables = null;
-    BaseDialog.presentDirectoryDialog(shell, variables);
+    BaseDialog.presentDirectoryDialog(shell, null, variables);
 //    DirectoryDialog dialog = new DirectoryDialog(shell);
 //    if (!isEmpty(cfg.getTitle())) {
 //      dialog.setText(cfg.getTitle());
