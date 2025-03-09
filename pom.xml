@@ -23,6 +23,7 @@
         <module>hop-example</module>
         <module>it-action-plugins</module>
         <module>it-transform-plugins</module>
+        <module>spring-boot</module>
     </modules>
 
     <scm>
