@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.apache.hop</groupId>
         <artifactId>hop-tools</artifactId>
-        <version>2.12.0-SNAPSHOT</version>
+        <version>2.13.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>hop-plugin-testing</artifactId>
@@ -75,79 +75,85 @@
         <dependency>
             <groupId>org.apache.hop</groupId>
             <artifactId>hop-engine-beam</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.beam</groupId>
-                    <artifactId>beam-runners-flink-1.16</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.beam</groupId>
-                    <artifactId>beam-runners-google-cloud-dataflow-java</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.beam</groupId>
-                    <artifactId>beam-runners-spark-3</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.beam</groupId>
-                    <artifactId>beam-sdks-java-io-azure</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.beam</groupId>
-                    <artifactId>beam-sdks-java-io-google-cloud-platform</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.beam</groupId>
-                    <artifactId>beam-sdks-java-io-hcatalog</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.beam</groupId>
-                    <artifactId>beam-sdks-java-io-azure</artifactId>
-                </exclusion>
+            <!--            <exclusions>-->
+            <!--&lt;!&ndash;                <exclusion>&ndash;&gt;-->
+            <!--&lt;!&ndash;                    <groupId>org.apache.beam</groupId>&ndash;&gt;-->
+            <!--&lt;!&ndash;                    <artifactId>beam-runners-flink-1.16</artifactId>&ndash;&gt;-->
+            <!--&lt;!&ndash;                </exclusion>&ndash;&gt;-->
+            <!--                <exclusion>-->
+            <!--                    <groupId>org.apache.beam</groupId>-->
+            <!--                    <artifactId>beam-runners-google-cloud-dataflow-java</artifactId>-->
+            <!--                </exclusion>-->
+            <!--                <exclusion>-->
+            <!--                    <groupId>org.apache.beam</groupId>-->
+            <!--                    <artifactId>beam-runners-spark-3</artifactId>-->
+            <!--                </exclusion>-->
+            <!--                <exclusion>-->
+            <!--                    <groupId>org.apache.beam</groupId>-->
+            <!--                    <artifactId>beam-sdks-java-io-azure</artifactId>-->
+            <!--                </exclusion>-->
+            <!--                <exclusion>-->
+            <!--                    <groupId>org.apache.beam</groupId>-->
+            <!--                    <artifactId>beam-sdks-java-io-google-cloud-platform</artifactId>-->
+            <!--                </exclusion>-->
+            <!--&lt;!&ndash;                <exclusion>&ndash;&gt;-->
+            <!--&lt;!&ndash;                    <groupId>org.apache.beam</groupId>&ndash;&gt;-->
+            <!--&lt;!&ndash;                    <artifactId>beam-sdks-java-io-hcatalog</artifactId>&ndash;&gt;-->
+            <!--&lt;!&ndash;                </exclusion>&ndash;&gt;-->
+            <!--                <exclusion>-->
+            <!--                    <groupId>org.apache.beam</groupId>-->
+            <!--                    <artifactId>beam-sdks-java-io-azure</artifactId>-->
+            <!--                </exclusion>-->
 
-                <exclusion>
-                    <groupId>com.azure</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.amazonaws</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.cloud.bigdataoss</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.auto.service</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.cloud</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.hive.hcatalog</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.hadoop</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.flink</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.netty</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
+            <!--                <exclusion>-->
+            <!--                    <groupId>com.azure</groupId>-->
+            <!--                    <artifactId>*</artifactId>-->
+            <!--                </exclusion>-->
+            <!--                <exclusion>-->
+            <!--                    <groupId>com.amazonaws</groupId>-->
+            <!--                    <artifactId>*</artifactId>-->
+            <!--                </exclusion>-->
+            <!--                <exclusion>-->
+            <!--                    <groupId>com.google.cloud.bigdataoss</groupId>-->
+            <!--                    <artifactId>*</artifactId>-->
+            <!--                </exclusion>-->
+            <!--                <exclusion>-->
+            <!--                    <groupId>com.google.auto.service</groupId>-->
+            <!--                    <artifactId>*</artifactId>-->
+            <!--                </exclusion>-->
+            <!--                <exclusion>-->
+            <!--                    <groupId>com.google.cloud</groupId>-->
+            <!--                    <artifactId>*</artifactId>-->
+            <!--                </exclusion>-->
+            <!--&lt;!&ndash;                <exclusion>&ndash;&gt;-->
+            <!--&lt;!&ndash;                    <groupId>org.apache.hive.hcatalog</groupId>&ndash;&gt;-->
+            <!--&lt;!&ndash;                    <artifactId>*</artifactId>&ndash;&gt;-->
+            <!--&lt;!&ndash;                </exclusion>&ndash;&gt;-->
+            <!--&lt;!&ndash;                <exclusion>&ndash;&gt;-->
+            <!--&lt;!&ndash;                    <groupId>org.apache.hadoop</groupId>&ndash;&gt;-->
+            <!--&lt;!&ndash;                    <artifactId>*</artifactId>&ndash;&gt;-->
+            <!--&lt;!&ndash;                </exclusion>&ndash;&gt;-->
+            <!--                <exclusion>-->
+            <!--                    <groupId>org.apache.flink</groupId>-->
+            <!--                    <artifactId>*</artifactId>-->
+            <!--                </exclusion>-->
+            <!--                <exclusion>-->
+            <!--                    <groupId>io.netty</groupId>-->
+            <!--                    <artifactId>*</artifactId>-->
+            <!--                </exclusion>-->
+            <!--            </exclusions>-->
         </dependency>
         <dependency>
             <groupId>org.apache.hop</groupId>
             <artifactId>hop-ui</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.hop</groupId>
+            <artifactId>hop-misc-projects</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.hop</groupId>
             <artifactId>hop-databases-h2</artifactId>
@@ -158,15 +164,27 @@
         </dependency>
         <dependency>
             <groupId>org.apache.hop</groupId>
-            <artifactId>hop-ui-rcp</artifactId>
-            <scope>runtime</scope>
+            <artifactId>hop-transform-datagrid</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.hop</groupId>
-            <artifactId>hop-databases-postgresql</artifactId>
-            <scope>runtime</scope>
+            <artifactId>hop-transform-writetolog</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hop</groupId>
+            <artifactId>hop-ui-rcp</artifactId>
+            <scope>runtime</scope>
+        </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
@@ -179,19 +197,6 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <systemPropertyVariables>
-                        <org.slf4j.simpleLogger.defaultLogLevel>TRACE</org.slf4j.simpleLogger.defaultLogLevel>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
     <profiles>
         <profile>
             <id>env-beam</id>
@@ -199,6 +204,88 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <dependencies>
+
+                <dependency>
+                    <groupId>org.apache.hop</groupId>
+                    <artifactId>hop-engines-beam</artifactId>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>org.apache.beam</groupId>
+                            <artifactId>beam-runners-flink-1.16</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.beam</groupId>
+                            <artifactId>beam-runners-google-cloud-dataflow-java</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.beam</groupId>
+                            <artifactId>beam-runners-spark-3</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.beam</groupId>
+                            <artifactId>beam-sdks-java-io-azure</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.beam</groupId>
+                            <artifactId>beam-sdks-java-io-kinesis</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>org.apache.beam</groupId>
+                            <artifactId>beam-sdks-java-io-google-cloud-platform</artifactId>
+                        </exclusion>
+                        <!--                        <exclusion>-->
+                        <!--                            <groupId>org.apache.beam</groupId>-->
+                        <!--                            <artifactId>beam-sdks-java-io-hcatalog</artifactId>-->
+                        <!--                        </exclusion>-->
+
+                        <!--                        <exclusion>-->
+                        <!--                            <groupId>com.azure</groupId>-->
+                        <!--                            <artifactId>*</artifactId>-->
+                        <!--                        </exclusion>-->
+                        <!--                        <exclusion>-->
+                        <!--                            <groupId>com.amazonaws</groupId>-->
+                        <!--                            <artifactId>*</artifactId>-->
+                        <!--                        </exclusion>-->
+                        <exclusion>
+                            <groupId>com.google.cloud</groupId>
+                            <artifactId>google-cloud-bigquery</artifactId>
+                        </exclusion>
+                        <!--                        <exclusion>-->
+                        <!--                            <groupId>com.google.auto.service</groupId>-->
+                        <!--                            <artifactId>*</artifactId>-->
+                        <!--                        </exclusion>-->
+                        <exclusion>
+                            <groupId>com.google.cloud</groupId>
+                            <artifactId>google-cloud-storage</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>com.google.cloud</groupId>
+                            <artifactId>google-cloud-bigtable</artifactId>
+                        </exclusion>
+                        <!--&lt;!&ndash;                        <exclusion>&ndash;&gt;-->
+                        <!--&lt;!&ndash;                            <groupId>org.apache.hive.hcatalog</groupId>&ndash;&gt;-->
+                        <!--&lt;!&ndash;                            <artifactId>*</artifactId>&ndash;&gt;-->
+                        <!--&lt;!&ndash;                        </exclusion>&ndash;&gt;-->
+                        <!--&lt;!&ndash;                        <exclusion>&ndash;&gt;-->
+                        <!--&lt;!&ndash;                            <groupId>org.apache.hadoop</groupId>&ndash;&gt;-->
+                        <!--&lt;!&ndash;                            <artifactId>*</artifactId>&ndash;&gt;-->
+                        <!--&lt;!&ndash;                        </exclusion>&ndash;&gt;-->
+                        <!--                        <exclusion>-->
+                        <!--                            <groupId>org.apache.flink</groupId>-->
+                        <!--                            <artifactId>*</artifactId>-->
+                        <!--                        </exclusion>-->
+                        <!--                        <exclusion>-->
+                        <!--                            <groupId>io.netty</groupId>-->
+                        <!--                            <artifactId>*</artifactId>-->
+                        <!--                        </exclusion>-->
+                    </exclusions>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.hop</groupId>
+                    <artifactId>hop-databases-postgresql</artifactId>
+                    <scope>runtime</scope>
+                </dependency>
+
                 <dependency>
                     <groupId>org.apache.hop</groupId>
                     <artifactId>hop-transform-constant</artifactId>
@@ -249,7 +336,6 @@
                     <artifactId>hop-transform-uniquerows</artifactId>
                     <scope>runtime</scope>
                 </dependency>
-
             </dependencies>
         </profile>
     </profiles>

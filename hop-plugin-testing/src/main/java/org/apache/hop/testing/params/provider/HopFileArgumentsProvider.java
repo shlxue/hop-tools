@@ -15,7 +15,7 @@ import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-class HopFileArgumentsProvider extends AnnotationBasedArgumentsProvider<HopFileSource> {
+class HopFileArgumentsProvider extends AnnotationBasedArgumentsProvider<HopFilter> {
   //  private final InputStreamProvider inputStreamProvider;
   private Charset charset;
   private int numLinesToSkip;
@@ -27,19 +27,19 @@ class HopFileArgumentsProvider extends AnnotationBasedArgumentsProvider<HopFileS
 
   @Override
   protected Stream<? extends Arguments> provideArguments(
-      ExtensionContext context, HopFileSource annotation) {
+      ExtensionContext context, HopFilter annotation) {
     return Stream.empty();
   }
 
   private static class HopFileParserIterator implements Iterator<Arguments> {
     private final CsvParser csvParser;
-    private final HopFileSource hopFileSource;
+    private final HopFilter hopFileSource;
     //    private final boolean useHeadersInDisplayName;
     //    private final Set<String> nullValues;
     private Arguments nextArguments;
     private String[] headers;
 
-    HopFileParserIterator(CsvParser csvParser, HopFileSource hopFileSource) {
+    HopFileParserIterator(CsvParser csvParser, HopFilter hopFileSource) {
       this.csvParser = csvParser;
       this.hopFileSource = hopFileSource;
       //      this.useHeadersInDisplayName = hopFileSource.useHeadersInDisplayName();

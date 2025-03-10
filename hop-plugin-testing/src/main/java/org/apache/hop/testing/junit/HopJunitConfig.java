@@ -1,9 +1,12 @@
 package org.apache.hop.testing.junit;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
 import org.apache.hop.core.config.plugin.ConfigFile;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.projects.config.ProjectsConfig;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.junit.platform.commons.util.StringUtils;
 
@@ -19,24 +22,34 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+@Getter
 class HopJunitConfig extends ConfigFile {
-  private Pattern jarPrefix = Pattern.compile("^hop-(transform|action|databases)-\\w+-");
+  static final String DEFAULT_PROJECT_IT_FOLDER = "integration-tests";
+  static final Pattern jarPrefix = Pattern.compile("^hop-(transform|action|databases)-\\w+-");
 
   private final IVariables variables;
-  private final Path classPath;
+  private final Path baseDir;
   private final Path testClassPath;
+  private final Path[] classPath;
+  private final Path itProjectDir;
   private final URI[] hopPluginJars;
-  private String configFilename;
+  @Setter private String configFilename;
 
   HopJunitConfig(IVariables variables) {
     this.variables = variables;
     Set<Path> paths = ReflectionUtils.getAllClasspathRootDirectories();
     Path pathPrefix = Paths.get(System.getProperty("user.dir"));
+    this.baseDir = searchBaseDir(paths, pathPrefix);
+    this.itProjectDir = searchItRootProject(baseDir, DEFAULT_PROJECT_IT_FOLDER);
     this.classPath = getClassPath(paths, pathPrefix, false);
-    this.testClassPath = getClassPath(paths, pathPrefix, true);
+//    this.testClassPath = getClassPath(paths, pathPrefix, true)[0];
+//    this.testClassPath = Paths.get(".");
+    testClassPath = null;
     this.hopPluginJars = searchHopPluginJars();
     applySystemProperties();
     this.configFilename = Const.HOP_CONFIG_FOLDER + Const.FILE_SEPARATOR + Const.HOP_CONFIG;
@@ -46,6 +59,37 @@ class HopJunitConfig extends ConfigFile {
     }
     Properties props = System.getProperties();
     props.stringPropertyNames().forEach(k -> variables.setVariable(k, props.getProperty(k)));
+  }
+
+  private Path searchBaseDir(Set<Path> subPaths, Path currentPath) {
+    Path latest = currentPath;
+    for (Path path : subPaths) {
+      while (path != null) {
+        Path gitPath = path.resolve(".git");
+        if (Files.isDirectory(gitPath)) {
+          return path;
+        }
+        if (Files.exists(path.resolve("pom.xml")) && latest.startsWith(path)) {
+          latest = path;
+        }
+        path = path.getParent();
+      }
+    }
+    return latest;
+  }
+
+  private Path searchItRootProject(Path baseDir, String defaultFolder) {
+    Path projectFile = Paths.get(defaultFolder, ProjectsConfig.DEFAULT_PROJECT_CONFIG_FILENAME);
+    Predicate<Path> filter = path -> Files.exists(path.resolve(projectFile));
+    if (filter.test(baseDir)) {
+      return baseDir.resolve(defaultFolder);
+    }
+    try (Stream<Path> stream = Files.walk(baseDir, 2)) {
+      return stream.filter(Files::isDirectory).filter(filter).findFirst().orElse(null);
+    } catch (IOException e) {
+      // ignore
+    }
+    return null;
   }
 
   private URI[] searchHopPluginJars() {
@@ -72,28 +116,6 @@ class HopJunitConfig extends ConfigFile {
     return false;
   }
 
-  public Path getClassPath() {
-    return classPath;
-  }
-
-  public Path getTestClassPath() {
-    return testClassPath;
-  }
-
-  public URI[] getHopPluginJars() {
-    return hopPluginJars;
-  }
-
-  @Override
-  public String getConfigFilename() {
-    return configFilename;
-  }
-
-  @Override
-  public void setConfigFilename(String configFilename) {
-    this.configFilename = configFilename;
-  }
-
   private void applySystemProperties() {
     System.setProperty(Const.HOP_DISABLE_CONSOLE_LOGGING, "Y");
     System.setProperty(Const.HOP_REDIRECT_STDERR, "N");
@@ -118,8 +140,8 @@ class HopJunitConfig extends ConfigFile {
     }
   }
 
-  private Path getClassPath(Set<Path> classPaths, Path pathPrefix, boolean testScope) {
-    Path pathSuffix = testScope ? Paths.get("test-classes") : Paths.get("classes");
+  private Path[] getClassPath(Set<Path> classPaths, Path pathPrefix, boolean excludeTestScope) {
+    Path pathSuffix = excludeTestScope ? Paths.get("classes") : Paths.get("test-classes");
     Set<Path> filter =
         classPaths.stream()
             .filter(path -> path.startsWith(pathPrefix))
@@ -128,7 +150,7 @@ class HopJunitConfig extends ConfigFile {
     if (filter.isEmpty()) {
       getModuleJar(pathPrefix.toString()).ifPresent(filter::add);
     }
-    return filter.isEmpty() ? null : filter.iterator().next();
+    return filter.toArray(new Path[0]);
   }
 
   private Optional<Path> getModuleJar(String basePath) {

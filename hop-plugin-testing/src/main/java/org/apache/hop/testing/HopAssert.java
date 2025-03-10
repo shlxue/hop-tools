@@ -1,158 +1,186 @@
 package org.apache.hop.testing;
 
 import org.apache.hop.core.Result;
-import org.apache.hop.core.row.IRowMeta;
-import org.apache.hop.pipeline.Pipeline;
 import org.apache.hop.pipeline.engine.EngineComponent;
-import org.apache.hop.pipeline.transform.BaseTransform;
+import org.apache.hop.pipeline.engine.IEngineComponent;
+import org.apache.hop.pipeline.engine.IPipelineEngine;
 import org.apache.hop.pipeline.transform.ITransform;
-import org.apache.hop.pipeline.transform.ITransformData;
+import org.apache.hop.pipeline.transform.ITransformMeta;
+import org.apache.hop.workflow.action.IAction;
+import org.apache.hop.workflow.engine.IWorkflowEngine;
+import org.hamcrest.Matchers;
 
-import java.util.function.Function;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public final class HopAssert {
 
-  public static void assertTransform(Pipeline trans, boolean run, boolean stop, boolean finish) {
-    //    assertThat(trans.isRunning()).isEqualTo(run);
-    //    assertThat(trans.isStopped()).isEqualTo(stop);
-    //    assertThat(trans.isFinished()).isEqualTo(finish);
+  public static void assertEqual(ITransformMeta expected, ITransformMeta actual) {}
+
+  public static void assertTransformMeta(ITransformMeta transformMeta) {}
+
+  public static void assertSuccess(Result rs) {
+    assertResult(rs, true, 0);
+  }
+
+  public static void assertSuccess(IEngineComponent component) {
+    assertComponent(component, true, 0);
+  }
+
+  public static void assertSuccess(ITransform transform) {
+
+    assertTransform(transform, 0, EngineComponent.ComponentExecutionStatus.STATUS_FINISHED);
+  }
+
+  public static void assertSuccess(IAction action) {
+    //    assertTransform(transform, 0, EngineComponent.ComponentExecutionStatus.STATUS_FINISHED);
+  }
+
+  public static void assertSuccess(IPipelineEngine<?> engine) {}
+
+  public static void assertSuccess(IWorkflowEngine<?> engine) {}
+
+  public static void assertFailed(ITransform transform, long errors) {
+    assertTransform(transform, errors, EngineComponent.ComponentExecutionStatus.STATUS_STOPPED);
+  }
+
+  public static void assertFailed(Result rs) {
+    assertFailed(rs, -1);
+  }
+
+  public static void assertFailed(Result rs, int errors) {
+    assertResult(rs, false, errors);
   }
 
   public static void assertTransform(
-      Pipeline trans, boolean run, boolean stop, boolean finish, boolean init, boolean prepare) {
-    //    assertThat(trans.isInitializing()).isEqualTo(init);
-    //    assertThat(trans.isPreparing()).isEqualTo(prepare);
-    assertTransform(trans, run, stop, finish);
+      ITransform transform, EngineComponent.ComponentExecutionStatus status) {
+    assertTransform(transform, -1, status);
   }
 
-  public static void assertResult(
-      Result actual, int exitStatus, boolean stopped, boolean safeStop) {
-    //    assertThat(actual.getExitStatus()).isEqualTo(exitStatus);
-    //    assertThat(actual.isStopped()).isEqualTo(stopped);
-    //        assertThat(actual.isSafeStop()).isEqualTo(safeStop);
+  public static void assertTransform(
+      ITransform transform, long errors, EngineComponent.ComponentExecutionStatus status) {
+    assertThat("Status mismatch", transform.getStatus(), Matchers.is(status));
+    if (errors >= 0) {
+      assertThat("Errors mismatch", transform.getErrors(), Matchers.is(errors));
+    } else {
+      assertThat("Errors mismatch", transform.getErrors(), Matchers.greaterThan(0L));
+    }
   }
 
-  public static void assertResult(Result actual, int exitStatus, boolean result) {
-    //    assertThat(actual.getExitStatus()).isEqualTo(exitStatus);
-    //    assertThat(actual.getResult()).isEqualTo(result);
+  public static void assertRows(ITransform transform, long read, long written) {
+    assertRows(transform, read, written, 0);
   }
 
-  public static void assertResult(Result actual, long entry, long errors, long retrievedFiles) {
-    //    assertThat(actual.getEntryNr()).isEqualTo(entry);
-    //    assertThat(actual.getNrErrors()).isEqualTo(errors);
-    //    assertThat(actual.getNrFilesRetrieved()).isEqualTo(retrievedFiles);
+  public static void assertRows(
+      ITransform transform, long read, long written, long input, long rejected) {
+    assertRows(transform, read, written, input, 0, 0, 0, rejected);
   }
 
-  public static void assertLines(Result actual, long input, long output) {
-    //    assertThat(actual.getNrLinesInput()).isEqualTo(input);
-    //    assertThat(actual.getNrLinesOutput()).isEqualTo(output);
+  public static void assertRows(ITransform transform, long read, long written, long deleted) {
+    assertRows(transform, read, written, 0, 0, 0, deleted, 0);
   }
 
-  public static void assertLines(
-      Result actual, long read, long written, long updated, long deleted, long rejected) {
-    //    assertThat(actual.getNrLinesRead()).isEqualTo(read);
-    //    assertThat(actual.getNrLinesWritten()).isEqualTo(written);
-    //    assertThat(actual.getNrLinesUpdated()).isEqualTo(updated);
-    //    assertThat(actual.getNrLinesDeleted()).isEqualTo(deleted);
-    //    assertThat(actual.getNrLinesRejected()).isEqualTo(rejected);
+  public static void assertRows(
+      ITransform transform, long read, long written, long output, long updated, long rejected) {
+    assertRows(transform, read, written, 0, output, updated, 0, rejected);
   }
 
-  public static void assertRows(ITransform transform, int nrRows, IRowMeta rowMeta) {}
-
-  public static void assertLines(
-      Result actual, long input, long output, long read, long u, long w, long d, long r) {
-    assertLines(actual, input, output);
-    assertLines(actual, read, u, w, d, r);
+  public static void assertRows(
+      ITransform transform,
+      long read,
+      long written,
+      long output,
+      long updated,
+      long deleted,
+      long rejected) {
+    assertRows(transform, read, written, 0, output, updated, deleted, rejected);
   }
 
-  public static void assertStep(
-      ITransformData stepData, EngineComponent.ComponentExecutionStatus status) {
-    assertEquals(status, stepData.getStatus());
+  public static void assertRows(
+      ITransform transform,
+      long read,
+      long written,
+      long input,
+      long output,
+      long updated,
+      long deleted,
+      long rejected) {
+    assertRows(
+        new long[] {read, written, input, output, updated, deleted, rejected},
+        new long[] {
+          transform.getLinesRead(),
+          transform.getLinesWritten(),
+          transform.getLinesInput(),
+          transform.getLinesOutput(),
+          transform.getLinesUpdated(),
+          transform.getLinesRejected()
+        });
   }
 
-  public static void assertStep(ITransform step, int read, int write, int error) {
-    assertStep(
-        step,
-        "[read, write, error] for step " + step.getTransformName(),
-        v -> new long[] {v.getLinesRead(), v.getLinesWritten(), v.getErrors()},
-        read,
-        write,
-        error);
+  public static void assertResult(Result rs, boolean passed, long errors) {
+    assertThat("Result mismatch", rs.getResult(), Matchers.is(passed));
+    if (errors >= 0) {
+      assertThat("Errors mismatch", rs.getNrErrors(), Matchers.is(errors));
+    } else {
+      assertThat("Errors mismatch", rs.getNrErrors(), Matchers.greaterThan(0L));
+    }
   }
 
-  public static void assertStep(ITransform step, int read, int write, int in, int out) {
-    assertStep(
-        step,
-        "[read, write, input, output] for step " + step.getTransformName(),
-        v ->
-            new long[] {
-              v.getLinesRead(), v.getLinesWritten(), v.getLinesInput(), v.getLinesOutput()
-            },
-        read,
-        write,
-        in,
-        out);
+  public static void assertComponent(IEngineComponent component, boolean passed, long errors) {}
+
+  public static void assertRows(Result result, long read, long written) {
+    assertRows(result, read, written, 0);
   }
 
-  public static void assertStepInput(
-      ITransform step, int read, int write, int error, int input, int skip) {
-    assertStep(
-        step,
-        "[read, write, error, input, skip] for step " + step.getTransformName(),
-        v ->
-            new long[] {
-              v.getLinesRead(),
-              v.getLinesWritten(),
-              v.getErrors(),
-              v.getLinesInput(),
-              v.getLinesSkipped()
-            },
-        read,
-        write,
-        error,
-        input,
-        skip);
+  public static void assertRows(Result result, long read, long written, long input, long rejected) {
+    assertRows(result, read, written, input, 0, 0, 0, rejected);
   }
 
-  public static void assertStepOutput(
-      ITransform step, int read, int write, int error, int output, int update, int reject) {
-    assertStep(
-        step,
-        "[read, write, error, output, update, reject] for " + step.getTransformName(),
-        v ->
-            new long[] {
-              v.getLinesRead(),
-              v.getLinesWritten(),
-              v.getErrors(),
-              v.getLinesOutput(),
-              v.getLinesUpdated(),
-              v.getLinesRejected()
-            },
-        read,
-        write,
-        error,
-        output,
-        update,
-        reject);
+  public static void assertRows(Result result, long read, long written, long deleted) {
+    assertRows(result, read, written, 0, 0, 0, deleted, 0);
   }
 
-  private static void assertStep(
-      ITransform step, String msg, Function<BaseTransform, long[]> function, long... args) {
-    //    Assertions.assertThat(step).isInstanceOf(BaseTransform.class);
-    //    assertThat(
-    //        msg, function.apply((BaseTransform) step), CoreMatchers.equalTo(args));
-    //        assertThat(function.apply((BaseStep) step)).isEqualTo(args);
-    //        assertArrayEquals(args, function.apply((BaseStep) step), msg);
+  public static void assertRows(
+      Result result, long read, long written, long output, long updated, long rejected) {
+    assertRows(result, read, written, 0, output, updated, 0, rejected);
   }
 
-  //    public static void assertLines(Result actual, long entry, long retrieveFiles, long errors) {
-  ////        assertThat(actual.getEntryNr(), is(entry));
-  ////        assertThat(actual.getNrFilesRetrieved(), is(retrieveFiles));
-  ////        assertThat(actual.getNrErrors(), is(errors));
-  //    }
+  public static void assertRows(
+      Result transform,
+      long read,
+      long written,
+      long output,
+      long updated,
+      long deleted,
+      long rejected) {
+    assertRows(transform, read, written, 0, output, updated, deleted, rejected);
+  }
 
-  //    public static void assertLogBuffer() {
-  //    }
+  public static void assertRows(
+      Result rs,
+      long input,
+      long output,
+      long read,
+      long written,
+      long updated,
+      long deleted,
+      long rejected) {
+    assertRows(
+        new long[] {input, output, read, written, updated, deleted, rejected},
+        new long[] {
+          rs.getNrLinesInput(),
+          rs.getNrLinesOutput(),
+          rs.getNrLinesRead(),
+          rs.getNrLinesWritten(),
+          rs.getNrLinesUpdated(),
+          rs.getNrLinesDeleted(),
+          rs.getNrLinesRejected()
+        });
+  }
+
+  private static void assertRows(long[] expected, long[] actual) {
+    assertThat(
+        "[read, written, input, output, updated, deleted, rejected] mismatch",
+        actual,
+        Matchers.equalTo(expected));
+  }
 }

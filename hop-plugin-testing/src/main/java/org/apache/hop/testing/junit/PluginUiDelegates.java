@@ -1,6 +1,7 @@
 package org.apache.hop.testing.junit;
 
 import org.apache.hop.core.logging.ILogChannel;
+import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.ITransformDialog;
@@ -11,14 +12,13 @@ final class PluginUiDelegates {
   public static final String META_NAME_SUFFIX = "-for-test";
   private final Shell parent;
   private final IVariables variables;
-  private final ILogChannel log;
+  private final ILogChannel log = LogChannel.UI;
   private final MetaDelegate metaDelegate;
 
   public PluginUiDelegates(HopJunit hopJunit, MetaDelegate metaDelegate) {
     this.metaDelegate = metaDelegate;
     this.parent = hopJunit.getSwtContext().getShell();
     this.variables = hopJunit.getVariables();
-    this.log = hopJunit.getLog();
   }
 
   private String genTransformName(Class<? extends ITransformMeta> transformMeta) {

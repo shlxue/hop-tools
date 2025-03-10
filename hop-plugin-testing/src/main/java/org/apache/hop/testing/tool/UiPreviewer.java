@@ -12,11 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 public final class UiPreviewer {
@@ -110,7 +106,7 @@ public final class UiPreviewer {
 
   public static Shell findEventLoopShell(Shell parent, Dialog dialog, Shell[] before) {
     List<Shell> after = new ArrayList<>(Arrays.asList(dialog.getParent().getShells()));
-    logger.info("Find the shell of dialog: {} -> {}", before.length, after.size());
+    logger.info("Find the shell of dialog: " + before.length + " -> " + after.size());
     after.removeAll(Arrays.asList(before));
     if (after.size() > 1) {
       after.removeIf(item -> !parent.equals(item.getParent()));

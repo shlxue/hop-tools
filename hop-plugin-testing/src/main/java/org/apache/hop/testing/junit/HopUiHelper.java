@@ -4,6 +4,8 @@ import org.apache.hop.core.IExtensionData;
 import org.apache.hop.core.database.IDatabase;
 import org.apache.hop.core.parameters.INamedParameters;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.pipeline.transform.ITransform;
+import org.apache.hop.workflow.action.IAction;
 import org.apache.hop.workflow.action.IActionDialog;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Widget;
@@ -26,6 +28,14 @@ public final class HopUiHelper {
     return Dialog.class.isAssignableFrom(clazz);
   }
 
+  public static boolean isAction(Class<?> clazz) {
+    return IAction.class.isAssignableFrom(clazz);
+  }
+
+  public static boolean isTransform(Class<?> clazz) {
+    return ITransform.class.isAssignableFrom(clazz);
+  }
+
   public static boolean isPlugin(Class<?> clazz) {
     return IVariables.class.isAssignableFrom(clazz) && IExtensionData.class.isAssignableFrom(clazz);
   }
@@ -35,7 +45,7 @@ public final class HopUiHelper {
   }
 
   public static boolean isEngine(Class<?> clazz) {
-    return isPlugin(clazz) && INamedParameters.class.isAssignableFrom(clazz);
+    return !isPlugin(clazz) && INamedParameters.class.isAssignableFrom(clazz);
   }
 
   public static boolean isActionUi(Class<?> clazz) {

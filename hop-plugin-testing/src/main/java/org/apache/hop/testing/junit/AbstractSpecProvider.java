@@ -57,7 +57,7 @@ public abstract class AbstractSpecProvider<T, M, E>
     this.target =
         Preconditions.notNull((T) riContext.getArguments().toArray()[0], "Param must not be null");
     if (!skip(mode)) {
-      logger.trace("Call origin test method: {}", riContext.getExecutable().getName());
+      logger.trace("Call origin test method: " + riContext.getExecutable().getName());
       invocation.proceed();
       return;
     }
@@ -73,6 +73,11 @@ public abstract class AbstractSpecProvider<T, M, E>
     specLatch = new CountDownLatch(additions.size());
     try (this) {
       this.invoke(target, mode, dispatcher);
+      if (!errors.isEmpty() || !unknownErrors.isEmpty()) {
+        while (specLatch.getCount() > 0) {
+          specLatch.countDown();
+        }
+      }
       if (!specLatch.await(10, TimeUnit.MINUTES)) {
         Assertions.fail("Timed out waiting for spec: " + additions.size());
       }
@@ -109,7 +114,7 @@ public abstract class AbstractSpecProvider<T, M, E>
 
   @Override
   public void invoke(T target, M mode, E dispatcher) {
-    logger.trace("Apply {} spec on {}", to(getClass()), to(target.getClass()));
+    logger.trace("Apply [" + to(getClass()) + "] spec on " + to(target.getClass()));
   }
 
   protected abstract E to(T target);
@@ -148,7 +153,7 @@ public abstract class AbstractSpecProvider<T, M, E>
   protected abstract boolean isDisposed(E dispatcher);
 
   private String printErrors(Collection<Throwable> errors) {
-    StringBuilder builder = new StringBuilder(1024).append("\n");
+    StringBuilder builder = new StringBuilder(1024);
     builder.append(errors.stream().map(this::toError).collect(Collectors.joining("\n")));
     builder.append("\n");
     return builder.toString();

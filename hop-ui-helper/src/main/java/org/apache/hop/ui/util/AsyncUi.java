@@ -1,5 +1,6 @@
 package org.apache.hop.ui.util;
 
+import org.apache.hc.core5.concurrent.DefaultThreadFactory;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Widget;
 
@@ -21,7 +22,7 @@ public final class AsyncUi implements AutoCloseable {
 
   public AsyncUi(Display display, AtomicInteger reference) {
     this.display = display;
-    this.service = Executors.newCachedThreadPool();
+    this.service = Executors.newCachedThreadPool(new DefaultThreadFactory("UI"));
     this.reference = reference;
   }
 

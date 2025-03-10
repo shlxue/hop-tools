@@ -8,7 +8,7 @@ public enum SpecMode {
   HEADLESS(true, true, false, true, false, StatusUtil.delayTime(1)),
   NORMAL(true, false, false, false, false, StatusUtil.delayTime(10)),
   DEBUG(true, false, true, true, true, StatusUtil.delayTime(100)),
-  PREVIEW(false, false, true, false, false, StatusUtil.delayTime(200));
+  PREVIEW(false, false, true, false, false, StatusUtil.delayTime(20000));
 
   private final boolean test;
   private final boolean headless;

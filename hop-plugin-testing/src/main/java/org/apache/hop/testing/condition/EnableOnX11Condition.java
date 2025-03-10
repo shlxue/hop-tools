@@ -25,7 +25,6 @@ public class EnableOnX11Condition implements ExecutionCondition {
 
   @Override
   public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
-    logger.trace("Check x11 condition");
     ConditionEvaluationResult result = DISABLED_ON_NON_X;
     try {
       if (GraphicsEnvironment.getLocalGraphicsEnvironment() != null) {
@@ -38,7 +37,7 @@ public class EnableOnX11Condition implements ExecutionCondition {
     //    if (hasAnnotation(context)) {
     //    }
     if (result.isDisabled()) {
-      logger.warn(result.getReason().orElseThrow());
+      logger.warn(result.getReason().orElse(null));
     }
     return result;
   }

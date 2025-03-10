@@ -1,5 +1,8 @@
 package org.apache.hop.maven.extensions;
 
+import java.util.Map;
+import java.util.Optional;
+import javax.inject.Singleton;
 import org.apache.maven.model.Activation;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.building.ModelProblemCollector;
@@ -10,10 +13,6 @@ import org.apache.maven.shared.utils.logging.MessageUtils;
 import org.codehaus.plexus.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Singleton;
-import java.util.Map;
-import java.util.Optional;
 
 @Singleton
 @Component(role = ProfileActivator.class, hint = "xwt-profile")

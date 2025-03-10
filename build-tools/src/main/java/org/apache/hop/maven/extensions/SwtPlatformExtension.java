@@ -1,5 +1,8 @@
 package org.apache.hop.maven.extensions;
 
+import java.util.Locale;
+import java.util.Properties;
+import javax.inject.Singleton;
 import org.apache.maven.AbstractMavenLifecycleParticipant;
 import org.apache.maven.execution.MavenExecutionRequest;
 import org.apache.maven.execution.MavenSession;
@@ -10,10 +13,6 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Singleton;
-import java.util.Locale;
-import java.util.Properties;
 
 @Singleton
 @Component(role = AbstractMavenLifecycleParticipant.class, hint = "osgi-platform")
@@ -37,8 +36,8 @@ public class SwtPlatformExtension extends AbstractMavenLifecycleParticipant {
     request.setUserProperties(merge(request.getUserProperties(), props));
     ProjectBuildingRequest buildingRequest = session.getProjectBuildingRequest();
     buildingRequest.setUserProperties(merge(buildingRequest.getUserProperties(), props));
-    if (session.getRepositorySession() instanceof DefaultRepositorySystemSession rss) {
-      rss.setUserProperties(props);
+    if (session.getRepositorySession() instanceof DefaultRepositorySystemSession) {
+      ((DefaultRepositorySystemSession) session.getRepositorySession()).setUserProperties(props);
     }
   }
 

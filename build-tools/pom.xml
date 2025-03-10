@@ -3,18 +3,21 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.hop</groupId>
-        <artifactId>hop-tools</artifactId>
-        <version>2.12.0-SNAPSHOT</version>
+        <artifactId>hop</artifactId>
+        <version>2.13.0-SNAPSHOT</version>
+        <relativePath></relativePath>
     </parent>
 
     <artifactId>build-tools</artifactId>
     <name>HOP : Build Tools</name>
 
     <properties>
-        <maven-core.version>3.6.3</maven-core.version>
-        <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
-        <plexus-component-metadata.version>2.2.0</plexus-component-metadata.version>
         <jandex.version>3.0.5</jandex.version>
+        <slf4j-api.version>2.0.4</slf4j-api.version>
+        <version.maven-core>3.9.9</version.maven-core>
+        <version.maven-shade-plugin>3.4.1</version.maven-shade-plugin>
+        <version.maven-shared-utils>3.4.2</version.maven-shared-utils>
+        <version.plexus-component-metadata>2.2.0</version.plexus-component-metadata>
     </properties>
 
     <dependencies>
@@ -26,19 +29,25 @@
         <dependency>
             <groupId>org.apache.maven.shared</groupId>
             <artifactId>maven-shared-utils</artifactId>
-            <version>3.3.4</version>
+            <version>${version.maven-shared-utils}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j-api.version}</version>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-core</artifactId>
-            <version>${maven-core.version}</version>
+            <version>${version.maven-core}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-shade-plugin</artifactId>
-            <version>${maven-shade-plugin.version}</version>
+            <version>${version.maven-shade-plugin}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -48,7 +57,7 @@
             <plugin>
                 <groupId>org.codehaus.plexus</groupId>
                 <artifactId>plexus-component-metadata</artifactId>
-                <version>${plexus-component-metadata.version}</version>
+                <version>${version.plexus-component-metadata}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -59,4 +68,15 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>jdk11</id>
+            <activation>
+                <jdk>11</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.target>11</maven.compiler.target>
+            </properties>
+        </profile>
+    </profiles>
 </project>

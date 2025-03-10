@@ -27,7 +27,6 @@ public class EnableSwtEnvironment implements ExecutionCondition {
 
   @Override
   public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
-    logger.trace("Check swt environment condition");
     ConditionEvaluationResult result = ENABLED_WHEN_SWT;
     //    if (context.getStore(HopJunit.GUI_NS).get("HEADLESS", Boolean.class) == null) {
     //      result = disabled("Disabled swt on non-X11 os");

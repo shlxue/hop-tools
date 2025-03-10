@@ -10,19 +10,23 @@
 
     <groupId>org.apache.hop</groupId>
     <artifactId>hop-tools</artifactId>
-    <version>2.12.0-SNAPSHOT</version>
+    <version>2.13.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+    <name>Hop :: Tools</name>
 
     <modules>
-        <module>build-tools</module>
+<!--        <module>build-tools</module>-->
 
         <module>hop-bom</module>
         <module>hop-ui-helper</module>
         <module>hop-plugin-testing</module>
+        <module>spring-boot-hop</module>
 
-        <module>hop-example</module>
-        <!--module>it-action-plugins</module>
-        <module>it-transform-plugins</module-->
+<!--        <module>flink-bom</module>-->
+        <module>it</module>
+        <!--module>shaded</module>
+        <module>vendor</module-->
+        <module>samples</module>
     </modules>
 
     <scm>
@@ -62,6 +66,13 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>opennews-snapshot</id>
+            <url>https://maven.openenws.com/repository/snapshot/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -78,27 +89,47 @@
                 <enabled>false</enabled>
             </releases>
         </pluginRepository>
+        <pluginRepository>
+            <id>opennews-snapshots</id>
+            <url>https://maven.openenws.com/repository/snapshot/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </pluginRepository>
     </pluginRepositories>
 
     <properties>
         <!-- maven -->
         <minimalJavaBuildVersion>17</minimalJavaBuildVersion>
+        <minimalMavenBuildVersion>[3.9.9,)</minimalMavenBuildVersion>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.build.timestamp.format>yyyy-MM-dd</maven.build.timestamp.format>
 
-        <mp.jacoco.version>0.8.12</mp.jacoco.version>
-        <mp.sonar.version>3.9.1.2184</mp.sonar.version>
-        <mp.spotless.version>2.29.0</mp.spotless.version>
-        <mp.spotbugs.version>4.7.3.4</mp.spotbugs.version>
+        <version.build-helper-maven-plugin>3.6.0</version.build-helper-maven-plugin>
+        <version.jacoco-maven-plugin>0.8.12</version.jacoco-maven-plugin>
+        <version.maven-toolchains-plugin>3.2.0</version.maven-toolchains-plugin>
+        <version.sonar.maven-plugin>3.9.1.2184</version.sonar.maven-plugin>
+        <version.spotbugs-maven-plugin>4.8.6.6</version.spotbugs-maven-plugin>
+        <version.spotless-maven-pugin>2.29.0</version.spotless-maven-pugin>
 
-        <swt.version>3.128.0</swt.version>
-        <rwt.version>3.29.0</rwt.version>
         <junit.version>5.11.0</junit.version>
+        <rwt.version>3.29.0</rwt.version>
+        <swt.version>3.128.0</swt.version>
         <h2.version>2.3.232</h2.version>
+        <jackson.version>2.15.4</jackson.version>
+        <beam.version>2.59.0</beam.version>
+        <flink.tag>1.16</flink.tag>
+        <flink.version>1.16.0</flink.version>
+        <hadoop.version>3.3.6</hadoop.version>
+        <spark.version>3.4.3</spark.version>
+        <hop.version>2.13.0-SNAPSHOT</hop.version>
+        <hamcrest.version>2.2</hamcrest.version>
 
+        <enforcer.core-lib-phase>none</enforcer.core-lib-phase>
         <jacoco.prepare-phase>none</jacoco.prepare-phase>
+        <jacoco.prepare-it-phase>none</jacoco.prepare-it-phase>
         <sonar.host.url>https://sonar.opennews.com/sonar</sonar.host.url>
         <sonar.inclusions>**/*.java</sonar.inclusions>
     </properties>
@@ -146,9 +177,14 @@
                 <version>${h2.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest</artifactId>
+                <version>${hamcrest.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
-                <version>2.0.13</version>
+                <version>2.0.14</version>
             </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -163,58 +199,118 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-toolchains-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>${version.maven-toolchains-plugin}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.6.0</version>
+                    <version>${version.build-helper-maven-plugin}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${mp.jacoco.version}</version>
+                    <version>${version.jacoco-maven-plugin}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
-                    <version>${mp.sonar.version}</version>
+                    <version>${version.sonar.maven-plugin}</version>
                 </plugin>
                 <plugin>
                     <groupId>com.diffplug.spotless</groupId>
                     <artifactId>spotless-maven-plugin</artifactId>
-                    <version>${mp.spotless.version}</version>
+                    <version>${version.spotless-maven-pugin}</version>
                 </plugin>
                 <plugin>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
-                    <version>4.8.6.6</version>
+                    <version>${version.spotbugs-maven-plugin}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
             <plugin>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.5.0</version>
-                <configuration>
-                    <rules>
-                        <requireJavaVersion>
-                            <version>[17,24)</version>
-                        </requireJavaVersion>
-                        <requireMavenVersion>
-                            <version>[3.9.9,4)</version>
-                        </requireMavenVersion>
-                    </rules>
-                    <failFast>true</failFast>
-                    <fail>true</fail>
-                </configuration>
+                <artifactId>maven-remote-resources-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>process-resource-bundles</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-java-version</id>
+                        <inherited>false</inherited>
+                    </execution>
+                    <execution>
+                        <id>enforce-maven-version</id>
+                        <inherited>false</inherited>
+                    </execution>
+                    <execution>
+                        <id>enforce-core-lib-version</id>
+                        <phase>${enforcer.core-lib-phase}</phase>
                         <goals>
                             <goal>enforce</goal>
                         </goals>
-                        <inherited>false</inherited>
+                        <inherited>true</inherited>
+                        <configuration>
+                            <rules>
+                                <requireSameVersions>
+                                    <dependencies>
+                                        <dependency>org.apache.beam</dependency>
+                                    </dependencies>
+                                    <dependencies>
+                                        <dependency>org.apache.flink</dependency>
+                                    </dependencies>
+                                    <dependencies>
+                                        <dependency>org.apache.hop</dependency>
+                                    </dependencies>
+                                    <dependencies>
+                                        <dependency>org.springframework</dependency>
+                                    </dependencies>
+                                    <dependencies>
+                                        <dependency>org.springframework.boot</dependency>
+                                    </dependencies>
+                                    <dependencies>
+                                        <dependency>com.fasterxml.jackson.core</dependency>
+                                    </dependencies>
+                                    <dependencies>
+                                        <dependency>org.apache.xmlgraphics</dependency>
+                                    </dependencies>
+
+                                    <dependencies>
+                                        <dependency>org.apache.logging.log4j</dependency>
+                                    </dependencies>
+                                    <dependencies>
+                                        <dependency>org.slf4j</dependency>
+                                    </dependencies>
+                                    <dependencies>
+                                        <dependency>io.grpc</dependency>
+                                    </dependencies>
+                                    <dependencies>
+                                        <dependency>org.apache.curator</dependency>
+                                    </dependencies>
+                                    <dependencies>
+                                        <dependency>org.eclipse.jetty</dependency>
+                                        <dependency>org.eclipse.jetty.websocket</dependency>
+                                    </dependencies>
+                                    <dependencies>
+                                        <dependency>org.ow2.asm</dependency>
+                                    </dependencies>
+
+                                    <dependencies>
+                                        <dependency>com.sun.jersey</dependency>
+                                        <dependency>org.glassfish.jersey</dependency>
+                                    </dependencies>
+                                </requireSameVersions>
+                            </rules>
+                            <failFast>true</failFast>
+                            <fail>true</fail>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -224,7 +320,7 @@
                     <goal>compiler</goal>
                     <toolchains>
                         <jdk>
-                            <version>[17,)</version>
+                            <version>${minimalJavaBuildVersion}</version>
                         </jdk>
                     </toolchains>
                 </configuration>
@@ -259,12 +355,6 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <id>prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
                         <id>report</id>
                         <phase>prepare-package</phase>
                         <goals>
@@ -272,17 +362,24 @@
                         </goals>
                     </execution>
                     <execution>
+                        <id>report-it-test</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>report-integration</goal>
+                        </goals>
+                    </execution>
+                    <execution>
                         <id>prepare-agent-it</id>
-                        <phase>pre-integration-test</phase>
+                        <phase>${jacoco.prepare-it-phase}</phase>
                         <goals>
                             <goal>prepare-agent-integration</goal>
                         </goals>
                     </execution>
                     <execution>
-                        <id>report-it-test</id>
-                        <phase>post-integration-test</phase>
+                        <id>prepare-agent</id>
+                        <phase>${jacoco.prepare-phase}</phase>
                         <goals>
-                            <goal>report-integration</goal>
+                            <goal>prepare-agent</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -322,7 +419,7 @@
                     <dependency>
                         <groupId>org.apache.hop</groupId>
                         <artifactId>build-tools</artifactId>
-                        <version>2.12.0-SNAPSHOT</version>
+                        <version>2.13.0-SNAPSHOT</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -364,6 +461,17 @@
             </dependencies>
         </profile>
         <profile>
+            <id>env-dev</id>
+            <activation>
+                <file>
+                    <exists>src/main/java</exists>
+                </file>
+            </activation>
+            <properties>
+                <enforcer.core-lib-phase>validate</enforcer.core-lib-phase>
+            </properties>
+        </profile>
+        <profile>
             <id>env-test</id>
             <activation>
                 <file>
@@ -372,8 +480,10 @@
             </activation>
             <properties>
                 <jacoco.prepare-phase>validate</jacoco.prepare-phase>
+                <jacoco.prepare-it-phase>pre-integration-test</jacoco.prepare-it-phase>
             </properties>
         </profile>
+
         <profile>
             <id>os-mac</id>
             <activation>
@@ -384,12 +494,34 @@
             <build>
                 <plugins>
                     <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <environmentVariables>
+                                <org.slf4j.simpleLogger.log.org.apache.hop>TRACE</org.slf4j.simpleLogger.log.org.apache.hop>
+                            </environmentVariables>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>default-test</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <argLine>-XstartOnFirstThread @{argLine}</argLine>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <executions>
                             <execution>
                                 <goals>
                                     <goal>integration-test</goal>
                                 </goals>
+                                <configuration>
+                                    <argLine>-XstartOnFirstThread @{argLine}</argLine>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

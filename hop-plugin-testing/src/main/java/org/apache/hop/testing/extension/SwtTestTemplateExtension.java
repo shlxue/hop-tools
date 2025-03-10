@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
 import org.junit.platform.commons.util.AnnotationUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -25,11 +26,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 class SwtTestTemplateExtension implements TestTemplateInvocationContextProvider {
-  private final Logger log;
-
-  SwtTestTemplateExtension(Logger log) {
-    this.log = log;
-  }
+  private final Logger log = LoggerFactory.getLogger(SwtTestTemplateExtension.class);
 
   @Override
   public boolean supportsTestTemplate(ExtensionContext context) {

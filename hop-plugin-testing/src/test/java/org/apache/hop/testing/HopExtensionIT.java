@@ -1,10 +1,15 @@
 package org.apache.hop.testing;
 
+import org.apache.hop.core.Result;
+import org.apache.hop.pipeline.engine.IPipelineEngine;
+import org.apache.hop.pipeline.transform.ITransform;
+import org.apache.hop.pipeline.transform.ITransformMeta;
 import org.apache.hop.pipeline.transforms.rowgenerator.RowGeneratorDialog;
 import org.apache.hop.ui.pipeline.transforms.dummy.DummyDialog;
 import org.apache.hop.ui.pipeline.transforms.injector.InjectorDialog;
 import org.apache.hop.ui.workflow.actions.dummy.ActionDummyDialog;
 import org.apache.hop.ui.workflow.actions.start.ActionStartDialog;
+import org.apache.hop.workflow.engine.IWorkflowEngine;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +17,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(HopExtension.class)
 @HopEnv(ui = SpecMode.NONE, withH2 = true)
 class HopExtensionIT {
+  @TestTemplate
+  void testTransformMeta(ITransformMeta meta) {
+    Assertions.assertNotNull(meta);
+  }
 
   @TestTemplate
   void previewTransformUi(DummyDialog dialog) {
@@ -36,5 +45,25 @@ class HopExtensionIT {
   @TestTemplate
   void previewActionUi(ActionStartDialog dialog) {
     Assertions.assertNotNull(dialog);
+  }
+
+  @TestTemplate
+  void testEngine(IPipelineEngine<?> engine) {
+    Assertions.assertNotNull(engine);
+  }
+
+  @TestTemplate
+  void testEngine(IWorkflowEngine<?> engine) {
+    Assertions.assertNotNull(engine);
+  }
+
+  @TestTemplate
+  void testResult(Result result) {
+    Assertions.assertNotNull(result);
+  }
+
+  @TestTemplate
+  void testTransform(ITransform transform) {
+    Assertions.assertNotNull(transform);
   }
 }

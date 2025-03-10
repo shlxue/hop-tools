@@ -1,5 +1,11 @@
 package org.apache.hop.maven.extensions;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import javax.inject.Singleton;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.execution.MojoExecutionEvent;
 import org.apache.maven.execution.MojoExecutionListener;
@@ -12,13 +18,6 @@ import org.apache.maven.shared.utils.logging.MessageUtils;
 import org.codehaus.plexus.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Singleton;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 @Singleton
 @Component(role = MojoExecutionListener.class, hint = "first-thread-on-mac")
@@ -44,11 +43,14 @@ public class FirstThreadOnMacExtension implements MojoExecutionListener {
     if (!("jar".equals(project.getPackaging()) && "osx".equals(os))) {
       return;
     }
-    if (isSurefireMojo(event.getExecution()) && withSwtDependency == null) {
+    boolean isTestMojo = isSurefireMojo(event.getExecution());
+    if (isTestMojo && withSwtDependency == null) {
       withSwtDependency = project.getDependencies().stream().anyMatch(this::isUiDependency);
     }
-    if (Boolean.TRUE.equals(withSwtDependency) && injectJvmArgToArgLine(event.getMojo())) {
-      log.info("{}", message(project.getArtifact()));
+    if (Boolean.TRUE.equals(withSwtDependency)) {
+      if (isTestMojo && injectJvmArgToArgLine(event.getMojo())) {
+        log.info("{}", message(project.getArtifact()));
+      }
       if (inMvnConfig) {
         return;
       }
@@ -111,7 +113,7 @@ public class FirstThreadOnMacExtension implements MojoExecutionListener {
     return MessageUtils.buffer()
         .a("Testing ")
         .project(artifact.getArtifactId())
-        .a(" module, apply jvm jvmArg:")
+        .a(" module, apply jvm arg:")
         .success(START_ON_FIRST_THREAD_ARG.trim());
   }
 

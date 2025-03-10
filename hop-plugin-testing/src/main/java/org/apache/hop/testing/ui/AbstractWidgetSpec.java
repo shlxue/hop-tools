@@ -24,7 +24,7 @@ class AbstractWidgetSpec<T extends Widget> implements Spec<T, SpecMode, Shell>, 
 
   @Override
   public void invoke(T target, SpecMode mode, Shell dispatcher) {
-    logger.trace("Apply {} ui-spec on {}", to(getClass()), to(target.getClass()));
+    logger.trace("Apply [" + to(getClass()) + "] ui-spec on " + to(target.getClass()));
     this.widget = target;
     this.mode = mode;
     this.shell = asyncUi.get(() -> getCurrentShell(dispatcher));

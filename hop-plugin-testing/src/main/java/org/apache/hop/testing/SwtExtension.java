@@ -5,11 +5,7 @@ import org.apache.hop.testing.junit.StatusUtil;
 import org.apache.hop.testing.junit.StoreKey;
 import org.apache.hop.testing.junit.SwtContext;
 import org.eclipse.swt.widgets.Shell;
-import org.junit.jupiter.api.extension.AfterAllCallback;
-import org.junit.jupiter.api.extension.BeforeAllCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
-import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
+import org.junit.jupiter.api.extension.*;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,42 +19,48 @@ public final class SwtExtension
   private static final Logger logger = LoggerFactory.getLogger(SwtExtension.class);
 
   private final SwtContext swtContext;
-  private final TestTemplateInvocationContextProvider delegate;
+  private final TestTemplateInvocationContextProvider swtUiProvider;
+  private boolean active;
 
   public SwtExtension() {
     this.swtContext = SwtContext.getInstance();
-    this.delegate = TestTemplates.swtUiProvider();
+    this.swtUiProvider = TestTemplates.swtUiProvider();
   }
 
   @Override
   public void beforeAll(ExtensionContext context) {
-    logger.trace("before all");
-    if (supportUi(context.getRequiredTestClass())) {
+    Class<?> testClass = context.getRequiredTestClass();
+    active = supportUi(testClass);
+    if (active) {
       StatusUtil.set(context, StoreKey.HOP_SWT_CONTEXT, swtContext);
       Shell shell = swtContext.getShell();
       StatusUtil.set(context, StoreKey.HOP_SWT_SHELL, shell);
-      injectShellField(context.getRequiredTestClass(), shell);
-      logger.trace("Inject swt to junit store");
+      injectShellField(testClass, shell);
+      logger.debug("Inject swt to junit store for " + testClass);
+    } else {
+      logger.trace("Not inject to swt extension: " + testClass);
     }
   }
 
   @Override
   public void afterAll(ExtensionContext context) {
-    logger.trace("after all");
-    StatusUtil.remove(context, StoreKey.HOP_SWT_CONTEXT);
-    StatusUtil.remove(context, StoreKey.HOP_SWT_SHELL);
-    logger.trace("Clean junit store for swt");
+    if (active) {
+      logger.debug("Clean swt status from junit store");
+      StatusUtil.remove(context, StoreKey.HOP_SWT_CONTEXT);
+      StatusUtil.remove(context, StoreKey.HOP_SWT_SHELL);
+      active = false;
+    }
   }
 
   @Override
   public boolean supportsTestTemplate(ExtensionContext context) {
-    return delegate.supportsTestTemplate(context);
+    return active && swtUiProvider.supportsTestTemplate(context);
   }
 
   @Override
   public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(
       ExtensionContext context) {
-    return delegate.provideTestTemplateInvocationContexts(context);
+    return swtUiProvider.provideTestTemplateInvocationContexts(context);
   }
 
   private boolean supportUi(Class<?> testClass) {
@@ -83,7 +85,7 @@ public final class SwtExtension
           ReflectionUtils.makeAccessible(field);
           field.set(null, shell);
         } catch (Throwable throwable) {
-          logger.info("Ignore field {}", field, throwable);
+          logger.debug("Ignore field {}", field, throwable);
         }
       }
     }

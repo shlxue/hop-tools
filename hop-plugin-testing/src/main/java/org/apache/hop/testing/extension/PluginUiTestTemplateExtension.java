@@ -16,6 +16,7 @@ import org.junit.platform.commons.util.AnnotationUtils;
 import org.junit.platform.commons.util.Preconditions;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -25,11 +26,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 class PluginUiTestTemplateExtension implements TestTemplateInvocationContextProvider {
-  private final Logger log;
-
-  PluginUiTestTemplateExtension(Logger log) {
-    this.log = log;
-  }
+  private final Logger log = LoggerFactory.getLogger(PluginUiTestTemplateExtension.class);
 
   @Override
   public boolean supportsTestTemplate(ExtensionContext context) {

@@ -34,8 +34,7 @@ abstract class GenericTypeParamResolver<T, I> implements ParameterResolver {
     if (types.length >= 2) {
       this.paramType = superclass.getActualTypeArguments()[0];
       this.interfaceClass = (Class<I>) superclass.getActualTypeArguments()[1];
-      logger.trace(
-          "Create param resolver for {} & {}", paramType.getTypeName(), interfaceClass.getName());
+      logger.trace("Create param resolver for [" + interfaceClass.getSimpleName() + "]");
     } else {
       this.paramType = null;
       this.interfaceClass = null;
@@ -45,24 +44,26 @@ abstract class GenericTypeParamResolver<T, I> implements ParameterResolver {
   @Override
   public final boolean supportsParameter(ParameterContext param, ExtensionContext context)
       throws ParameterResolutionException {
-    if (paramType instanceof Class<?> supportedClazz
-        && param.getParameter().getParameterizedType() instanceof Class<?> paramClazz
-        && supportedClazz.isAssignableFrom(paramClazz)) {
-      logger.trace("Checking {} param", getClass().getSimpleName());
-      return matchParamType(paramClazz, interfaceClass) && matchInterface(paramClazz, forceMatch);
-    }
-    return false;
+    Class<?> paramClazz = param.getParameter().getType();
+    return matchParamType(paramClazz, interfaceClass) && matchInterface(paramClazz, forceMatch);
+    //    if (paramType instanceof Class<?> supportedClazz
+    //        && param.getParameter().getParameterizedType() instanceof Class<?> paramClazz
+    //        && supportedClazz.isAssignableFrom(paramClazz)) {
+    //      return matchParamType(paramClazz, interfaceClass) && matchInterface(paramClazz,
+    // forceMatch);
+    //    }
+    //    return false;
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public final T resolveParameter(ParameterContext parameterContext, ExtensionContext context)
+  public T resolveParameter(ParameterContext parameterContext, ExtensionContext context)
       throws ParameterResolutionException {
     Preconditions.notNull(parameterContext, "Parameter must not be null");
     this.context = context;
     Class<T> type = (Class<T>) parameterContext.getParameter().getType();
     List<Constructor<?>> constructors =
-        Arrays.stream(type.getDeclaredConstructors())
+        Stream.of(type.getDeclaredConstructors())
             .filter(c -> Modifier.isPublic(c.getModifiers()))
             .toList();
     Preconditions.condition(
@@ -70,7 +71,7 @@ abstract class GenericTypeParamResolver<T, I> implements ParameterResolver {
     List<Throwable> errors = new ArrayList<>();
     for (Constructor<?> item : constructors) {
       if (!matchConstructor(item)) {
-        logger.debug("Ignore constructor {}", toSignature(item));
+        logger.debug("Ignore constructor " + toSignature(item));
         continue;
       }
       try {

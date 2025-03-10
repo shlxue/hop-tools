@@ -84,8 +84,8 @@ public final class Listeners {
           new EnterSelectionDialog(
               shell,
               schemas,
-              BaseMessages.getString(PKG, "DeleteDialog.AvailableSchemas.Title", name),
-              BaseMessages.getString(PKG, "DeleteDialog.AvailableSchemas.Message", name));
+              BaseMessages.getString(PKG, "EnterSelectionDialog.JdbcSchema.Title", name),
+              BaseMessages.getString(PKG, "EnterSelectionDialog.JdbcSchema.Message", name));
       return Optional.ofNullable(dialog.open(Arrays.asList(schemas).indexOf(schema)));
     }
     return Optional.empty();
@@ -128,8 +128,8 @@ public final class Listeners {
         new EnterSelectionDialog(
             shell,
             tables,
-            BaseMessages.getString(PKG, "DeleteDialog.AvailableSchemas.Title", name),
-            BaseMessages.getString(PKG, "DeleteDialog.AvailableSchemas.Message", name));
+            BaseMessages.getString(PKG, "EnterSelectionDialog.JdbcTable.Title", name),
+            BaseMessages.getString(PKG, "EnterSelectionDialog.JdbcTable.Message", name));
     return Optional.ofNullable(dialog.open(Arrays.asList(tables).indexOf(table)));
   }
 
