@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.apache.hop</groupId>
+        <artifactId>hop-tools</artifactId>
+        <version>2.13.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>shaded</artifactId>
+    <packaging>pom</packaging>
+    <name>Hop :: Shaded</name>
+
+    <modules>
+        <!--        <module>beam-runner-local</module>-->
+        <module>beam-runners</module>
+        <module>beam-extensions</module>
+
+        <module>flink-dist</module>
+        <!--        <module>spark-dist</module>-->
+        <module>hop-dist</module>
+        <!--        <module>hop-plugin-dist</module>-->
+        <!--        <module>hop-engine-beam-app</module>-->
+        <!--        <module>hop-tech</module>-->
+        <!--        <module>hop-rest-api</module>-->
+    </modules>
+
+    <properties>
+        <flink.tag>1.16</flink.tag>
+        <jackson.version>2.15.4</jackson.version>
+        <debezium.version>3.0.0.Final</debezium.version>
+        <beam.version>2.59.0</beam.version>
+        <spark.version>3.4.3</spark.version>
+        <spark-bin.version>2.12</spark-bin.version>
+        <dist.shade-phase>none</dist.shade-phase>
+        <shaded.final-name/>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.hop</groupId>
+                <artifactId>hop-bom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.hop</groupId>
+                <artifactId>flink-bom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.debezium</groupId>
+                <artifactId>debezium-bom</artifactId>
+                <version>${debezium.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.beam</groupId>
+                <artifactId>beam-sdks-java-bom</artifactId>
+                <version>${beam.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-lib-same-version</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-shade-plugin</artifactId>
+                <configuration>
+                    <artifactSet>
+                        <excludes>
+                            <exclude>ch.qos.logback:*</exclude>
+                            <exclude>com.fasterxml.jackson*:*</exclude>
+                            <exclude>io.netty:*</exclude>
+                            <exclude>commons-cli:commons-cli</exclude>
+                            <exclude>junit:*</exclude>
+                            <exclude>org.apache.logging.log4j:*</exclude>
+                            <exclude>org.slf4j:*</exclude>
+                        </excludes>
+                    </artifactSet>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>shade-dist</id>
+                        <phase>${dist.shade-phase}</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <shadeTestJar>false</shadeTestJar>
+                            <outputFile>${project.build.directory}/${shaded.final-name}.jar</outputFile>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.hop</groupId>
+                        <artifactId>build-tools</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>pkg-shaded</id>
+            <activation>
+                <file>
+                    <missing>${basedir}/README.md</missing>
+                </file>
+            </activation>
+            <properties>
+                <dist.shade-phase>package</dist.shade-phase>
+            </properties>
+        </profile>
+    </profiles>
+</project>
