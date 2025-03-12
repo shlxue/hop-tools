@@ -18,12 +18,12 @@
 <!--        <module>build-tools</module>-->
 
         <module>hop-bom</module>
-        <module>hop-ui-helper</module>
-        <module>hop-plugin-testing</module>
-        <module>spring-boot-hop</module>
+<!--        <module>hop-ui-helper</module>-->
+<!--        <module>hop-plugin-testing</module>-->
+<!--        <module>spring-boot-hop</module>-->
 
 <!--        <module>flink-bom</module>-->
-        <module>it</module>
+<!--        <module>it</module>-->
         <!--module>shaded</module>
         <module>vendor</module-->
         <module>samples</module>

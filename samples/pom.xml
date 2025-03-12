@@ -12,8 +12,9 @@
     <name>Hop Samples</name>
 
     <modules>
-        <module>hop-plugin-samples</module>
-        <module>spring-boot-hop-samples</module>
+        <module>jdbc-sample</module>
+<!--        <module>hop-plugin-samples</module>-->
+<!--        <module>spring-boot-hop-samples</module>-->
     </modules>
 
     <dependencyManagement>
