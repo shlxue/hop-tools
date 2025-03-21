@@ -1,7 +1,5 @@
 package io;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
@@ -30,7 +28,7 @@ public abstract class JdbcTest<T> {
     this.info = new Properties();
     info.put("user", get(type, "user"));
     info.put("password", get(type, "password"));
-    this.conn = DriverManager.getConnection(config.getProperty(type, "url"), info);
+    this.conn = DriverManager.getConnection(get(type, "url"), info);
   }
 
   private static String get(String type, String key) {

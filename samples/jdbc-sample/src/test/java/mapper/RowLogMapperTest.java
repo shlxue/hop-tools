@@ -1,0 +1,4 @@
+package mapper;
+
+class RowLogMapperTest {
+}

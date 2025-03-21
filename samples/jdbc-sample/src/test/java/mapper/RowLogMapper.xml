@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cbd.findig.cdc.event.app.mapper.RowLogsMapper">
+
+    <insert id="create">
+        create table if Not exists cdc_logs.row_logs_${date} (
+                                                                 id bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'primary key',
+            table_id bigint(20) NOT NULL COMMENT '表id',
+            op char(4) NOT NULL COMMENT '操作类型 增 I, 删 D, 改 U',
+            op_time datetime(0) NOT NULL COMMENT '操作时间',
+            key_val varchar(256) NOT NULL COMMENT '数据主键',
+            scan_time datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            source_id bigint(20) DEFAULT NULL COMMENT '来源id',
+            `push_time` datetime(6) DEFAULT NULL COMMENT '推送kafka时间',
+            `push_batch` bigint(20) DEFAULT NULL COMMENT '推送批次 毫秒值',
+            `push_offset` bigint(20) DEFAULT NULL COMMENT '推送后的offset',
+            `log_file` varchar(50) DEFAULT NULL COMMENT 'log file name',
+            `log_position` bigint(20) DEFAULT NULL COMMENT 'log file position',
+            PRIMARY KEY (id) USING BTREE,
+            INDEX idx_table_id(table_id) USING BTREE,
+            INDEX idx_op_time(op_time) USING BTREE,
+            INDEX idx_scan_time(scan_time) USING BTREE,
+            INDEX idx_key_val(key_val) USING BTREE
+            )
+    </insert>
+
+    <insert id="insertHistory" parameterType="com.cbd.findig.cdc.event.app.model.RowLogs">
+        insert ignore into cdc_logs.row_logs_${date}(
+        id, table_id, op, op_time, key_val,
+        scan_time, source_id, push_time, push_batch, push_offset,
+        log_file, log_position)
+        values
+        <foreach collection ="rowLogs" item="item" separator =",">
+            (#{item.id},#{item.tableId},#{item.op},#{item.opTime},#{item.keyVal},
+            #{item.scanTime},#{item.sourceId},#{item.pushTime},#{item.pushBatch},#{item.pushOffset},
+            #{item.logFile}, #{item.logPosition})
+        </foreach>
+    </insert>
+
+    <select id="findData4ReplenishData" resultType="com.cbd.findig.cdc.event.app.model.RowLogs">
+        select id, table_id, op, op_time, key_val, scan_time, source_id, log_file, log_position
+        from row_logs
+        where id &lt; #{currentReadRowLogId}
+          and op_time > #{scanOpTime}
+        order by id
+            limit #{batchSize}
+    </select>
+
+    <insert id="updateRowLogsHistory">
+        insert into cdc_logs.row_logs_${date}(
+        id, table_id, op, op_time, key_val,
+        scan_time, source_id, log_file, log_position,
+        push_time,push_batch,push_offset)
+        values
+        <foreach collection ="rowLogs" item="rowLlog" separator =",">
+            (#{rowLlog.id},#{rowLlog.tableId},#{rowLlog.op},#{rowLlog.opTime},#{rowLlog.keyVal},
+            #{rowLlog.scanTime},#{rowLlog.sourceId},#{rowLlog.logFile},#{rowLlog.logPosition},
+            #{rowLlog.pushTime},#{rowLlog.pushBatch},#{rowLlog.pushOffset})
+        </foreach >
+        ON DUPLICATE KEY UPDATE
+        push_time = VALUES(push_time),
+        push_batch = VALUES(push_batch),
+        push_offset = VALUES(push_offset)
+
+    </insert>
+</mapper>
